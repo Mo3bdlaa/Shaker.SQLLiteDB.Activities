@@ -10,8 +10,9 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag to publish (for example v1.0.0). It must already exist.'
+        description: 'Version tag to publish, for example v1.0.0. It is created from the branch you run this on if it does not exist yet.'
         required: true
+        default: 'v1.0.0'
 
 permissions:
   contents: write
@@ -22,8 +23,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.inputs.tag || github.ref }}
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
@@ -92,7 +91,10 @@ jobs:
           NOTES
           sed -i "s/VERSION_PLACEHOLDER/${VERSION}/g" notes.md
 
+          # --target creates the tag from this commit when it does not exist yet, so the
+          # release can also be published straight from the Actions tab.
           gh release create "$TAG" \
+            --target "$GITHUB_SHA" \
             --title "Shaker SQLite Activities $TAG" \
             --notes-file notes.md \
             artifacts/*.nupkg artifacts/*.snupkg artifacts/SHA256SUMS.txt

@@ -43,8 +43,9 @@ The package targets both UiPath project types:
 | Windows - Legacy | `net461` |
 | Windows (.NET 6 / .NET 8) | `net6.0` |
 
-1. Build the package (see [Building from source](#building-from-source)) or download
-   `Shaker.SQLLiteDB.Activities.<version>.nupkg`.
+1. Download `Shaker.SQLLiteDB.Activities.<version>.nupkg` from the
+   [Releases page](https://github.com/Mo3bdlaa/Shaker.SQLLiteDB.Activities/releases),
+   or build it yourself (see [Building from source](#building-from-source)).
 2. Put it in a feed Studio can see: a local folder feed, or your Orchestrator / MyGet / Azure Artifacts feed.
 3. In Studio: **Manage Packages → Settings**, add the folder as a source, then install
    **Shaker.SQLLiteDB.Activities**.
@@ -323,6 +324,13 @@ dotnet pack    src/Shaker.SQLLiteDB.Activities/Shaker.SQLLiteDB.Activities.cspro
 ```
 
 Or use the helper scripts: `./build.sh` (Linux/macOS) and `.\build.ps1` (Windows).
+
+To publish a release, push a version tag. The `release` workflow builds, tests, packs and attaches the
+package to a GitHub Release:
+
+```bash
+git tag v1.0.1 && git push origin v1.0.1
+```
 
 The .NET SDK 8 builds both target frameworks on any operating system; the `net461` output is produced
 with the reference assemblies package, so no Windows machine is required for CI.

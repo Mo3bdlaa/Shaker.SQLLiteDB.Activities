@@ -1,0 +1,18 @@
+<Project>
+
+  <PropertyGroup>
+    <Company>Shaker</Company>
+    <Authors>Shaker</Authors>
+    <Product>Shaker SQLite Activities for UiPath</Product>
+    <Copyright>Copyright (c) Shaker</Copyright>
+    <Version>1.0.0</Version>
+    <LangVersion>latest</LangVersion>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <!-- Allows building the Windows-flavoured target frameworks from Linux/macOS CI. -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <ArtifactsDirectory>$(MSBuildThisFileDirectory)artifacts</ArtifactsDirectory>
+  </PropertyGroup>
+
+</Project>

@@ -1,8 +1,9 @@
 # Shaker.SQLLiteDB.Activities
 
 A UiPath activity library for SQLite that needs **no ODBC driver, no System.Data.SQLite install and no
-machine level configuration**. The SQLite engine itself (`e_sqlite3`, through SQLitePCLRaw) ships inside
-the package, so publishing the library to Orchestrator is all a robot needs.
+machine level configuration**. The SQLite engine itself ships inside the package (SQLitePCLRaw's
+**SQLCipher** build), so publishing the library to Orchestrator is all a robot needs — and **AES-256
+encrypted databases work out of the box**.
 
 It is built around the two things that make SQLite awkward in RPA:
 
@@ -13,9 +14,9 @@ It is built around the two things that make SQLite awkward in RPA:
   with *"database is locked"*, every write takes a **lock file** next to the database. Writers queue up
   in an orderly way, across processes and across machines when the database sits on a file share.
 
-On top of that: transactions with savepoints, bulk insert and upsert, batch execution, and exports to
-**CSV, XLSX and JSON** (the .xlsx writer is built into this package, so Excel does not have to be
-installed and no Open XML library is dragged into your project).
+On top of that: transactions with savepoints, bulk insert and upsert, batch execution, database
+encryption, and exports to **CSV, XLSX and JSON** (the .xlsx writer is built into this package, so Excel
+does not have to be installed and no Open XML library is dragged into your project).
 
 ---
 
@@ -25,6 +26,7 @@ installed and no Open XML library is dragged into your project).
 - [Quick start](#quick-start)
 - [Activity reference](#activity-reference)
 - [How concurrency works](#how-concurrency-works)
+- [Encryption](#encryption)
 - [Exporting data](#exporting-data)
 - [Performance notes](#performance-notes)
 - [Troubleshooting](#troubleshooting)
@@ -143,7 +145,8 @@ SQLite Import CSV   FilePath: "C:\In\customers.csv"
 | **SQLite Get Table Schema** | `DataTable` with ordinal, column name, declared type, not null, default value and primary key flag. |
 | **SQLite Create Table** | Creates a table from the shape of a DataTable. |
 | **SQLite Maintenance** | `VACUUM`, `ANALYZE`, `PRAGMA optimize`, WAL checkpoint, integrity check, foreign key check, `REINDEX`. Reports `IsHealthy` for the checks. |
-| **SQLite Backup Database** | A consistent copy through the SQLite online backup API — safe while the database is in use, unlike copying the file. |
+| **SQLite Set Password** | Encrypts a database, changes its password, or removes the encryption. |
+| **SQLite Backup Database** | A consistent copy through the SQLite online backup API — safe while the database is in use, unlike copying the file. Encrypted databases are copied with SQLCipher's export, and the copy can get its own password. |
 | **SQLite Attach Database** | Attaches a second database file under an alias so one query can join both. |
 | **SQLite Disconnect** | Closes a connection that was opened outside a scope. |
 
@@ -200,6 +203,56 @@ safer and much faster. If you must use a share, keep transactions short and leav
 
 ---
 
+## Encryption
+
+The engine bundled here is a **SQLCipher** build, so encryption needs nothing extra installed. It is a
+superset of plain SQLite: databases without a password behave exactly as they always did.
+
+### Using an encrypted database
+
+Fill in `Password` on the Connect Scope (or on a standalone activity) and everything else works
+unchanged — queries, bulk insert, exports, WAL, the writer lock:
+
+```
+SQLite Connect Scope    DatabasePath: "C:\Data\orders.db"
+                        Password: in_DbPassword
+```
+
+Store the password in an Orchestrator **Credential asset**, never in the workflow.
+
+A wrong or missing password fails on the Connect Scope with a message that says so. That check is
+deliberate: SQLite itself happily *opens* an encrypted file without the key and only complains at the
+first read, which would otherwise surface much later as a confusing "file is not a database".
+
+### Encrypting, re-keying, decrypting
+
+```
+SQLite Set Password   DatabasePath: "C:\Data\orders.db"
+                      Password:     ""              ' the current one, empty when not yet encrypted
+                      NewPassword:  in_NewPassword  ' empty removes the encryption
+                      Result:       message
+                      BackupPath:   out_backup
+```
+
+* **Changing** the password of an already encrypted database happens in place (`PRAGMA rekey`).
+* **Encrypting** a plain database, or **decrypting** an encrypted one, cannot be done in place: SQLCipher
+  writes a new file and this activity swaps it in, keeping the previous file as `<database>.bak` unless
+  you switch `KeepBackup` off. Tables, indexes, views and triggers all come across.
+* Because the file is replaced, this activity must run **outside** a Connect Scope; it says so plainly if
+  you nest it.
+
+### What it protects, and what it does not
+
+The whole file is encrypted with AES-256, including the header, so nothing readable is left on disk — no
+table names, no stray strings. It protects the database **at rest**: a copied or stolen `.db` file is
+useless without the password. It does not protect against someone who can read the password your robot
+uses, and the pages are decrypted in memory while the workflow runs.
+
+Third party notice: SQLCipher Community Edition is © Zetetic LLC, BSD licensed, and is redistributed
+through the `SQLitePCLRaw.bundle_e_sqlcipher` package.
+
+---
+
 ## Exporting data
 
 * **CSV** is streamed straight from the data reader, so a million row export uses no more memory than a
@@ -241,14 +294,18 @@ your writes are legitimately long.
 Something outside this library is writing to the same file — another tool, or a robot whose
 `LockFilePath` points somewhere else. Make sure every writer uses the same lock file path.
 
-**"The embedded SQLite engine (e_sqlite3) could not be loaded"**
+**"The embedded SQLite engine (e_sqlcipher) could not be loaded"**
 The native files that come with `SQLitePCLRaw.bundle_e_sqlite3` were not deployed next to the assembly.
 Re-install the package in the project so that NuGet restores its dependencies; in Windows - Legacy
 projects check that the `runtimes\win-x64\native` folder made it into the published package.
 
-**Password / encryption**
-The bundled engine is plain `e_sqlite3` and does **not** support encrypted databases. The `Password`
-property only works if you replace the native engine with a SQLCipher build.
+**"The database could not be read with the password that was supplied"**
+Either the password is wrong, or the file is not encrypted at all (supplying a password for a plain
+database fails the same way — leave `Password` empty for those).
+
+**"The loaded SQLite engine has no encryption support"**
+Another package in the project has pulled in a plain `e_sqlite3` native engine, which wins over the
+SQLCipher one at load time. Check the project's dependencies for another SQLite package.
 
 **Values come back as `Object`**
 A SQLite column is dynamically typed, so a column that contains both numbers and text cannot have one

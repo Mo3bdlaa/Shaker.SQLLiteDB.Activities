@@ -87,9 +87,21 @@ namespace Shaker.SQLLiteDB.Activities.Core
             }
             catch (SqliteException ex)
             {
+                var target = effective.ResolvedDatabasePath ?? effective.DatabasePath ?? "(connection string)";
+
+                // 26 = "file is not a database": either the file is encrypted and the password is wrong
+                // or missing, or it is not a SQLite file at all.
+                if ((ex.SqliteErrorCode & 0xFF) == 26)
+                {
+                    throw new SQLiteActivityException(string.Format(CultureInfo.InvariantCulture,
+                        string.IsNullOrEmpty(effective.Password)
+                            ? "The database '{0}' could not be read. It is encrypted, so its password has to be supplied in 'Password' (or it is not a SQLite database at all)."
+                            : "The database '{0}' could not be read with the password that was supplied. Check 'Password'.",
+                        target), ex);
+                }
+
                 throw new SQLiteActivityException(string.Format(CultureInfo.InvariantCulture,
-                    "Could not open the SQLite database '{0}': {1}",
-                    effective.ResolvedDatabasePath ?? effective.DatabasePath ?? "(connection string)", ex.Message), ex);
+                    "Could not open the SQLite database '{0}': {1}", target, ex.Message), ex);
             }
 
             return new SQLiteConnectionHandle(connection, effective);

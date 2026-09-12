@@ -21,7 +21,11 @@ namespace Shaker.SQLLiteDB.Activities.Core
         /// <summary>How the file is opened. Default is <see cref="SQLiteOpenMode.ReadWriteCreate"/>.</summary>
         public SQLiteOpenMode OpenMode { get; set; } = SQLiteOpenMode.ReadWriteCreate;
 
-        /// <summary>Optional password. Only works when the native engine is a SQLCipher build; the bundled e_sqlite3 engine is not encrypted.</summary>
+        /// <summary>
+        /// Password of an encrypted (SQLCipher) database. Leave it empty for a normal, unencrypted
+        /// database. Setting it on a database that was created without one fails to open: use the
+        /// <c>SQLite Set Password</c> activity to encrypt an existing database.
+        /// </summary>
         public string Password { get; set; }
 
         /// <summary>Journal mode applied on open. Default is WAL, which is what makes concurrent readers possible.</summary>
@@ -210,12 +214,27 @@ namespace Shaker.SQLLiteDB.Activities.Core
             {
                 connection.Open();
                 ApplyPragmas(connection);
+                Verify(connection);
                 return connection;
             }
             catch
             {
                 connection.Dispose();
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// Reads one page of the schema so that a wrong or missing password fails here, where the error
+        /// can be explained, instead of surfacing later as "file is not a database" on the first query.
+        /// Opening an encrypted database without its password succeeds as far as SQLite is concerned.
+        /// </summary>
+        private static void Verify(SqliteConnection connection)
+        {
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = "select count(*) from sqlite_master;";
+                command.ExecuteScalar();
             }
         }
 

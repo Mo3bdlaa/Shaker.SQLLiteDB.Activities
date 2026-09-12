@@ -58,10 +58,10 @@ namespace Shaker.SQLLiteDB.Activities.Activities
         [Description("How long SQLite waits for a lock held by another connection before it reports 'database is locked'.")]
         public InArgument<int> BusyTimeoutMilliseconds { get; set; } = 30000;
 
-        /// <summary>Password for SQLCipher builds. The bundled engine is not encrypted.</summary>
+        /// <summary>Password of an encrypted (SQLCipher) database.</summary>
         [Category("Connection")]
         [DisplayName("Password")]
-        [Description("Only works with a SQLCipher enabled native engine. The engine bundled with this package does not support encryption.")]
+        [Description("Password of an encrypted database. Leave it empty for a normal database. Use the SQLite Set Password activity to encrypt an existing database or to change its password.")]
         public InArgument<string> Password { get; set; }
 
         #endregion

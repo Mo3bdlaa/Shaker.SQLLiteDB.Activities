@@ -41,7 +41,7 @@ The package targets both UiPath project types:
 | UiPath project | Target framework in the package |
 | --- | --- |
 | Windows - Legacy | `net461` |
-| Windows (.NET 6 / .NET 8) | `net6.0` |
+| Windows (.NET 6 / .NET 8) | `net6.0-windows7.0` |
 
 1. Download `Shaker.SQLLiteDB.Activities.<version>.nupkg` from the
    [Releases page](https://github.com/Mo3bdlaa/Shaker.SQLLiteDB.Activities/releases),
@@ -51,6 +51,11 @@ The package targets both UiPath project types:
    **Shaker.SQLLiteDB.Activities**.
 
 The activities appear in the **Shaker → SQLite** section of the activity panel.
+
+**Leave `nuget.org` enabled** as a package source while installing. The package depends on
+`Microsoft.Data.Sqlite.Core` and `SQLitePCLRaw`, and Studio restores those from there. If the only
+source is your local folder, the package installs but its assembly cannot load, and the activity panel
+stays empty.
 
 ---
 

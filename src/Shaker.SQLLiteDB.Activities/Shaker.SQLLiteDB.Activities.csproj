@@ -1,9 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!-- net461      => UiPath "Windows - Legacy" projects
-         net6.0      => UiPath "Windows" projects (Studio 2021.10+, also loads in .NET 8 projects) -->
-    <TargetFrameworks>net461;net6.0</TargetFrameworks>
+    <!-- net461         => UiPath "Windows - Legacy" projects
+         net6.0-windows => UiPath "Windows" projects (Studio 2021.10+, also loads in .NET 8 projects).
+         The windows flavour matters: Studio looks for lib/net6.0-windows7.0, which is what every
+         activity package that supports modern projects ships. -->
+    <TargetFrameworks>net461;net6.0-windows</TargetFrameworks>
     <RootNamespace>Shaker.SQLLiteDB.Activities</RootNamespace>
     <AssemblyName>Shaker.SQLLiteDB.Activities</AssemblyName>
     <AssemblyTitle>Shaker SQLite Activities</AssemblyTitle>
@@ -17,7 +19,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageReleaseNotes>Initial release.</PackageReleaseNotes>
+    <PackageReleaseNotes>Fixes activity discovery in UiPath Studio: the modern assembly now ships as lib/net6.0-windows7.0 instead of lib/net6.0, and System.Activities is no longer a package dependency.</PackageReleaseNotes>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PackageOutputPath>$(ArtifactsDirectory)</PackageOutputPath>
@@ -56,9 +58,12 @@
     <Reference Include="System.IO.Compression.FileSystem" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
-    <!-- System.Activities for modern .NET, as shipped and used by UiPath Studio. -->
-    <PackageReference Include="UiPath.Workflow.Runtime" Version="6.0.3" />
+  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0-windows'">
+    <!-- System.Activities for modern .NET. Compile time only, exactly like System.Activities is on
+         .NET Framework: the workflow host - UiPath Studio and the robot - brings its own copy at run
+         time, and shipping a second one as a package dependency gives the project two System.Activities
+         assemblies, which is enough for Studio to stop recognising the activities. -->
+    <PackageReference Include="UiPath.Workflow.Runtime" Version="6.0.3" PrivateAssets="all" ExcludeAssets="runtime" />
   </ItemGroup>
 
 </Project>

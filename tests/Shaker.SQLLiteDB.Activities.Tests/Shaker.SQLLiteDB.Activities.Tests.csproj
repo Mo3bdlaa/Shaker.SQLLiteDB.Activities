@@ -1,7 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <!-- Matches the asset the package actually ships, so the tests exercise what robots load. -->
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <RollForward>LatestMajor</RollForward>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <IsPackable>false</IsPackable>
     <Nullable>disable</Nullable>
     <AssemblyName>Shaker.SQLLiteDB.Activities.Tests</AssemblyName>
@@ -13,6 +16,8 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="xunit" Version="2.9.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+    <!-- The workflow host supplies System.Activities at run time; in the tests that host is us. -->
+    <PackageReference Include="UiPath.Workflow.Runtime" Version="6.0.3" />
   </ItemGroup>
 
   <ItemGroup>

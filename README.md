@@ -1,0 +1,288 @@
+# Shaker.SQLLiteDB.Activities
+
+A UiPath activity library for SQLite that needs **no ODBC driver, no System.Data.SQLite install and no
+machine level configuration**. The SQLite engine itself (`e_sqlite3`, through SQLitePCLRaw) ships inside
+the package, so publishing the library to Orchestrator is all a robot needs.
+
+It is built around the two things that make SQLite awkward in RPA:
+
+* **Many readers at once** — the library opens databases in WAL mode, so readers never block each other
+  and never block the writer. `SQLite Parallel Query` runs several statements concurrently, each on its
+  own read only connection.
+* **One writer at a time** — SQLite allows exactly one writer. Instead of letting robots collide and fail
+  with *"database is locked"*, every write takes a **lock file** next to the database. Writers queue up
+  in an orderly way, across processes and across machines when the database sits on a file share.
+
+On top of that: transactions with savepoints, bulk insert and upsert, batch execution, and exports to
+**CSV, XLSX and JSON** (the .xlsx writer is built into this package, so Excel does not have to be
+installed and no Open XML library is dragged into your project).
+
+---
+
+## Contents
+
+- [Install](#install)
+- [Quick start](#quick-start)
+- [Activity reference](#activity-reference)
+- [How concurrency works](#how-concurrency-works)
+- [Exporting data](#exporting-data)
+- [Performance notes](#performance-notes)
+- [Troubleshooting](#troubleshooting)
+- [Building from source](#building-from-source)
+
+---
+
+## Install
+
+The package targets both UiPath project types:
+
+| UiPath project | Target framework in the package |
+| --- | --- |
+| Windows - Legacy | `net461` |
+| Windows (.NET 6 / .NET 8) | `net6.0` |
+
+1. Build the package (see [Building from source](#building-from-source)) or download
+   `Shaker.SQLLiteDB.Activities.<version>.nupkg`.
+2. Put it in a feed Studio can see: a local folder feed, or your Orchestrator / MyGet / Azure Artifacts feed.
+3. In Studio: **Manage Packages → Settings**, add the folder as a source, then install
+   **Shaker.SQLLiteDB.Activities**.
+
+The activities appear in the **Shaker → SQLite** section of the activity panel.
+
+---
+
+## Quick start
+
+### Read some rows
+
+```
+SQLite Connect Scope           DatabasePath: "C:\Data\orders.db"
+└── SQLite Execute Query       Sql: "select id, customer, total from orders where total > @min"
+                               Parameters: new Dictionary(Of String, Object) From {{"min", 100}}
+                               Result: dtOrders
+```
+
+No connection string, no driver, no DSN. The scope opens the file (creating it when missing), turns on
+WAL and closes everything again when the sequence ends, also when an activity throws.
+
+### Write safely while other robots are running
+
+```
+SQLite Connect Scope              DatabasePath: "\\fileserver\share\orders.db"
+└── SQLite Write Lock Scope       (takes the lock once for everything inside)
+    └── SQLite Transaction Scope  (all or nothing)
+        ├── SQLite Execute Non Query  "insert into orders (customer, total) values (@c, @t)"
+        └── SQLite Bulk Insert        TableName: "order_lines", DataTable: dtLines
+```
+
+Every other robot that wants to write waits its turn instead of failing. Readers are not affected at all.
+
+### Export a report
+
+```
+SQLite Export To Excel   Sql: "select * from orders where created >= @from"
+                         Parameters: {"from", DateTime.Today.AddDays(-7)}
+                         FilePath: "C:\Reports\weekly.xlsx"
+                         SheetName: "Orders"
+```
+
+### Load a CSV into a table
+
+```
+SQLite Import CSV   FilePath: "C:\In\customers.csv"
+                    TableName: "customers"
+                    CreateTableIfNotExists: True
+                    ConflictPolicy: Upsert
+                    KeyColumns: {"id"}
+```
+
+---
+
+## Activity reference
+
+### Scopes
+
+| Activity | What it does |
+| --- | --- |
+| **SQLite Connect Scope** | Opens the database and shares the connection with every SQLite activity inside it. Applies the PRAGMA tuning (WAL, busy timeout, synchronous, foreign keys) and closes the connection on success, on error and on cancellation. Also outputs the connection, if you prefer to pass it around by hand. |
+| **SQLite Transaction Scope** | Commits everything inside as one unit of work, rolls back when an activity throws. Nested scopes use a `SAVEPOINT`, so an inner scope can fail without discarding the outer work. Takes the writer lock for the whole transaction by default. |
+| **SQLite Write Lock Scope** | Takes the cross process writer lock once and holds it for everything inside, so a group of writes cannot be interleaved with another robot's writes. Reports how long it waited. |
+
+### Reading
+
+| Activity | Result |
+| --- | --- |
+| **SQLite Execute Query** | `DataTable` (+ `RowCount`). Column types are derived from the values that actually came back, or forced to text with `ColumnTyping`. `MaxRows` caps the result. |
+| **SQLite Execute Scalar** | The first value of the first row, plus ready made `TextResult`, `NumberResult` and `IsNull` outputs. |
+| **SQLite Parallel Query** | `Dictionary(Of String, DataTable)` — several queries at once, each on its own read only connection. |
+
+### Writing
+
+| Activity | Result |
+| --- | --- |
+| **SQLite Execute Non Query** | Affected rows (+ `LastInsertRowId`). |
+| **SQLite Bulk Insert** | Rows written, using one prepared statement and batched transactions. Conflict policy: `Abort`, `Ignore`, `Replace`, `Rollback` or `Upsert` (with `KeyColumns` / `UpdateColumns`). Can create the table from the DataTable. |
+| **SQLite Execute Batch** | Runs a `List(Of SQLiteStatement)` in one transaction, with the lock taken once. Optionally collects failures instead of stopping. |
+| **SQLite Execute Script** | Runs a multi statement script from a string or a `.sql` file, in one transaction. |
+| **SQLite Import CSV** | Reads a CSV file and bulk loads it, with the same conflict handling as the bulk insert. |
+
+### Exporting
+
+| Activity | Result |
+| --- | --- |
+| **SQLite Export To CSV** | Streams a query, a table or a DataTable into a CSV file. Delimiter, quoting, encoding, date format and append are configurable. |
+| **SQLite Export To Excel** | Writes a real `.xlsx` workbook: bold frozen header, auto filter, column widths, typed number and date cells. Several queries can go into one workbook, one sheet each. Results beyond the Excel row limit spill into extra sheets. |
+| **SQLite Export To JSON** | A JSON array of objects, to a file or straight into a `String` variable. Numbers, booleans and nulls keep their JSON types. |
+
+### Schema and housekeeping
+
+| Activity | Result |
+| --- | --- |
+| **SQLite Table Exists** | `Boolean`. |
+| **SQLite Get Table Names** | `List(Of String)`, optionally including views. |
+| **SQLite Get Table Schema** | `DataTable` with ordinal, column name, declared type, not null, default value and primary key flag. |
+| **SQLite Create Table** | Creates a table from the shape of a DataTable. |
+| **SQLite Maintenance** | `VACUUM`, `ANALYZE`, `PRAGMA optimize`, WAL checkpoint, integrity check, foreign key check, `REINDEX`. Reports `IsHealthy` for the checks. |
+| **SQLite Backup Database** | A consistent copy through the SQLite online backup API — safe while the database is in use, unlike copying the file. |
+| **SQLite Attach Database** | Attaches a second database file under an alias so one query can join both. |
+| **SQLite Disconnect** | Closes a connection that was opened outside a scope. |
+
+Every activity also has the usual UiPath properties: `TimeoutMS`, `ContinueOnError` (with an
+`ErrorMessage` output), and the connection properties that let it run standalone, without a scope.
+
+---
+
+## How concurrency works
+
+### Many readers
+
+The Connect Scope sets `journal_mode = WAL`. In WAL mode a reader sees a consistent snapshot and never
+waits for the writer, and the writer never waits for readers. So:
+
+* several workflows, robots or machines can read the same `.db` file at the same time;
+* `SQLite Parallel Query` opens one read only connection per query and runs them concurrently;
+* read activities never take the writer lock (unless you switch `LockReads` on, which is only useful for
+  non-WAL databases on a file share).
+
+### One writer, without the "database is locked" lottery
+
+SQLite itself allows one writer at a time. Left alone, two robots writing at the same moment produce
+`SQLITE_BUSY` errors in whichever one loses. This library adds two layers on top:
+
+1. **A lock file.** Before a write, the activity opens `<database>.writelock` exclusively. The next
+   writer, in any process on any machine that can reach the file, waits for it. The operating system
+   releases the handle when a process dies, so a crashed robot cannot leave a stale lock behind.
+   A side car file `<database>.writelock.owner` records machine, user and process id of the current
+   holder, which is what a lock timeout message reports.
+2. **A retry policy.** If the engine still reports `SQLITE_BUSY` or `SQLITE_LOCKED` — for example because
+   a process that does not use this library is writing — the statement is retried with an exponential
+   backoff before the activity gives up.
+
+Settings (on every activity, and on the Connect Scope for everything inside it):
+
+| Property | Meaning |
+| --- | --- |
+| `LockScope` | `Machine` (default, lock file), `Process` (in-memory only), `None` (rely on SQLite alone). |
+| `LockFilePath` | Where the lock file lives. Empty means `<database>.writelock`. Point several robots at the same path to serialize them. |
+| `LockTimeoutMilliseconds` | How long to wait for the lock before failing. Default 60 s. |
+| `BusyTimeoutMilliseconds` | How long SQLite itself waits for an engine level lock. Default 30 s. |
+| `RetryAttempts`, `RetryInitialDelayMilliseconds` | The retry policy, on the Connect Scope. |
+
+**Grouping writes.** Taking the lock per activity is fine for single statements. When several writes
+belong together, wrap them in a **SQLite Write Lock Scope**: the lock is taken once, held for the whole
+group, and the activities inside notice it and do not take it again. A **SQLite Transaction Scope** does
+the same and adds all-or-nothing semantics.
+
+**A note on file shares.** Running a SQLite database on a network share is possible with this library,
+because the writer lock is a plain file lock, but SQLite's own advice still applies: local disk is
+safer and much faster. If you must use a share, keep transactions short and leave `LockScope` on
+`Machine`.
+
+---
+
+## Exporting data
+
+* **CSV** is streamed straight from the data reader, so a million row export uses no more memory than a
+  hundred row one. Quoting follows RFC 4180: a field is quoted only when it contains the delimiter, a
+  quote or a line break, unless you ask for `QuoteAllFields`.
+* **XLSX** is written by this package itself — a SpreadsheetML workbook inside a zip container. That
+  keeps the package free of `DocumentFormat.OpenXml` and its habit of colliding with the version UiPath's
+  own Excel activities bring along. Numbers stay numbers, dates get a real date format, booleans become
+  `TRUE`/`FALSE`, and `NULL` becomes a genuinely empty cell.
+* **JSON** keeps real JSON types: numbers unquoted, `true`/`false` for booleans, `null` for `NULL`,
+  ISO 8601 for dates, Base64 for blobs.
+
+---
+
+## Performance notes
+
+* Prefer **SQLite Bulk Insert** over a loop of Execute Non Query: one prepared statement and one
+  transaction per batch instead of one transaction per row — typically two orders of magnitude faster.
+* Keep `BatchSize` around 1000 for large loads. `0` puts everything in one transaction, which is fastest
+  but holds the writer lock for the whole load.
+* Put read heavy workflows in a Connect Scope and reuse the connection instead of letting each activity
+  open its own.
+* Run **SQLite Maintenance → WalCheckpoint** after a big load if the `-wal` file has grown large, and
+  **Vacuum** occasionally after deleting a lot of data.
+* `synchronous = Normal` (the default) together with WAL is both safe and fast. `Off` is faster still but
+  can corrupt the database if the machine loses power.
+
+---
+
+## Troubleshooting
+
+**"Timed out after 60000 ms waiting for the writer lock…"**
+Another writer is holding the lock. The message names the machine, user and process. Either the other
+side runs a long transaction (shorten it), or a workflow crashed while holding the lock file — in that
+case the operating system has already released it, so simply retry. Raise `LockTimeoutMilliseconds` if
+your writes are legitimately long.
+
+**"database is locked" even though the lock is configured**
+Something outside this library is writing to the same file — another tool, or a robot whose
+`LockFilePath` points somewhere else. Make sure every writer uses the same lock file path.
+
+**"The embedded SQLite engine (e_sqlite3) could not be loaded"**
+The native files that come with `SQLitePCLRaw.bundle_e_sqlite3` were not deployed next to the assembly.
+Re-install the package in the project so that NuGet restores its dependencies; in Windows - Legacy
+projects check that the `runtimes\win-x64\native` folder made it into the published package.
+
+**Password / encryption**
+The bundled engine is plain `e_sqlite3` and does **not** support encrypted databases. The `Password`
+property only works if you replace the native engine with a SQLCipher build.
+
+**Values come back as `Object`**
+A SQLite column is dynamically typed, so a column that contains both numbers and text cannot have one
+.NET type. Set `ColumnTyping` to `AllText` if you want strings everywhere.
+
+---
+
+## Building from source
+
+```bash
+dotnet build   Shaker.SQLLiteDB.Activities.sln -c Release
+dotnet test    tests/Shaker.SQLLiteDB.Activities.Tests/Shaker.SQLLiteDB.Activities.Tests.csproj
+dotnet pack    src/Shaker.SQLLiteDB.Activities/Shaker.SQLLiteDB.Activities.csproj -c Release
+# the .nupkg lands in ./artifacts
+```
+
+Or use the helper scripts: `./build.sh` (Linux/macOS) and `.\build.ps1` (Windows).
+
+The .NET SDK 8 builds both target frameworks on any operating system; the `net461` output is produced
+with the reference assemblies package, so no Windows machine is required for CI.
+
+### Layout
+
+```
+src/Shaker.SQLLiteDB.Activities
+├── Core/          connection settings, connection and transaction handles, writer lock,
+│                  retry policy, command execution, bulk writer, schema helpers
+├── IO/            CSV reader and writer, XLSX writer, JSON writer
+└── Activities/    the UiPath activities (a NativeActivity shell that reads the enclosing
+                   scope plus an async worker that does the database work off the workflow thread)
+tests/             unit and workflow level tests covering the engine, the writer lock, bulk
+                   writes, the file formats, and the activities running in the real workflow runtime
+```
+
+## License
+
+MIT — see [LICENSE](LICENSE).

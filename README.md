@@ -50,7 +50,25 @@ The package targets both UiPath project types:
 3. In Studio: **Manage Packages → Settings**, add the folder as a source, then install
    **Shaker.SQLLiteDB.Activities**.
 
-The activities appear in the **Shaker → SQLite** section of the activity panel.
+### Finding them in the Activities panel
+
+The 23 activities live under the **`Shaker.SQLLiteDB.Activities.Activities`** node of the panel, which is
+built from the namespace. The quickest way to see them is to type **`SQLite`** in the panel's search box.
+
+If the panel stays empty, work through these in order:
+
+1. **Show classic activities.** Custom activity packages are "classic" activities. With the Modern
+   design experience on, the panel hides them until you switch that on: Activities panel → the filter
+   (funnel) icon → **Show Classic**. This is the most common reason a freshly installed custom package
+   looks like it installed nothing.
+2. **Check the assembly actually loaded.** Open the **Imports** panel and look for
+   `Shaker.SQLLiteDB.Activities.Activities`. If it is listed, the assembly loaded and the problem is
+   only the panel filter above. If it is missing, the package did not load — carry on to step 3.
+3. **Check the dependencies restored.** The package needs `Microsoft.Data.Sqlite.Core` and
+   `SQLitePCLRaw`, which Studio pulls from nuget.org. If your only package source is a local folder,
+   the package installs but its assembly cannot load, and nothing appears. Re-enable nuget.org in
+   Manage Packages → Settings and reinstall.
+4. **Reopen the project** after installing. Studio caches the activity list per project.
 
 **Leave `nuget.org` enabled** as a package source while installing. The package depends on
 `Microsoft.Data.Sqlite.Core` and `SQLitePCLRaw`, and Studio restores those from there. If the only

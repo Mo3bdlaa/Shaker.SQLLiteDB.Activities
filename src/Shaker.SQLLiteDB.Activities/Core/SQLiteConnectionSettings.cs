@@ -49,8 +49,13 @@ namespace Shaker.SQLLiteDB.Activities.Core
         /// <summary>Page cache size in kilobytes. Zero keeps the engine default.</summary>
         public int CacheSizeKilobytes { get; set; }
 
-        /// <summary>Use the ADO.NET connection pool.</summary>
-        public bool Pooling { get; set; } = true;
+        /// <summary>
+        /// Use the ADO.NET connection pool. Off by default, on purpose: a pooled connection keeps the
+        /// database file open after it is closed, and on Windows that means the file cannot be moved,
+        /// zipped or deleted afterwards - which workflows do all the time. This library keeps one
+        /// connection open for the whole scope anyway, so pooling buys very little here.
+        /// </summary>
+        public bool Pooling { get; set; }
 
         /// <summary>Create the folder of <see cref="DatabasePath"/> when it does not exist yet.</summary>
         public bool CreateDirectoryIfMissing { get; set; } = true;

@@ -262,6 +262,21 @@ namespace Shaker.SQLLiteDB.Activities.Core
                 try
                 {
                     connection.Close();
+
+                    // Closing a pooled connection only parks it: the file handle stays open and, on
+                    // Windows, the database file stays locked. Anything that wants to move or delete
+                    // the file afterwards needs the pool emptied first.
+                    if (Settings.Pooling)
+                    {
+                        try
+                        {
+                            SqliteConnection.ClearPool(connection);
+                        }
+                        catch (SqliteException)
+                        {
+                            // Best effort: a failure here must not hide the real reason for closing.
+                        }
+                    }
                 }
                 finally
                 {

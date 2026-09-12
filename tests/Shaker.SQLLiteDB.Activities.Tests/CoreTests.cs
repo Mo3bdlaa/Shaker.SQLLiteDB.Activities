@@ -266,6 +266,42 @@ namespace Shaker.SQLLiteDB.Activities.Tests
             Assert.ThrowsAny<Exception>(() => Execute(reader, "insert into t values (1);"));
         }
 
+
+        [Fact]
+        public void TheDatabaseFileIsFreeAgainOnceTheConnectionIsClosed()
+        {
+            // Workflows routinely archive, zip or delete the database after the scope ends. A pooled
+            // connection keeps the file handle open, and on Windows that makes all of those fail.
+            using var db = new TestDatabase();
+
+            using (var handle = db.Open())
+            {
+                Execute(handle, "create table t (id integer primary key);");
+                Execute(handle, "insert into t values (1);");
+            }
+
+            var moved = db.File("archived.db");
+            System.IO.File.Move(db.Path, moved);
+            Assert.True(System.IO.File.Exists(moved));
+            System.IO.File.Delete(moved);
+        }
+
+        [Fact]
+        public void PoolingCanBeTurnedOnAndStillReleasesTheFile()
+        {
+            using var db = new TestDatabase();
+            var settings = db.Settings();
+            settings.Pooling = true;
+
+            using (var handle = SQLiteConnectionHandle.Open(settings))
+            {
+                Execute(handle, "create table t (id integer primary key);");
+            }
+
+            System.IO.File.Delete(db.Path);
+            Assert.False(System.IO.File.Exists(db.Path));
+        }
+
         internal static void Execute(SQLiteConnectionHandle handle, string sql)
         {
             handle.Execute((connection, transaction) =>

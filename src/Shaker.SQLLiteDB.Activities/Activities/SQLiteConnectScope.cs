@@ -74,7 +74,7 @@ namespace Shaker.SQLLiteDB.Activities.Activities
 
         [Category("Connection")]
         [DisplayName("Password")]
-        [Description("Only works with a SQLCipher enabled native engine. The engine bundled with this package does not support encryption.")]
+        [Description("Password of an encrypted database. Leave it empty for a normal database. Use the SQLite Set Password activity to encrypt an existing database or to change its password.")]
         public InArgument<string> Password { get; set; }
 
         [Category("Connection")]
@@ -134,6 +134,11 @@ namespace Shaker.SQLLiteDB.Activities.Activities
         [Description("Version of the embedded SQLite engine, for example 3.45.1.")]
         public OutArgument<string> SQLiteVersion { get; set; }
 
+        [Category("Output")]
+        [DisplayName("Cipher version")]
+        [Description("Version of the SQLCipher layer, for example '4.5.2 community'. Empty when the loaded engine cannot do encryption.")]
+        public OutArgument<string> CipherVersion { get; set; }
+
         #endregion
 
         protected override bool CanInduceIdle
@@ -163,6 +168,11 @@ namespace Shaker.SQLLiteDB.Activities.Activities
             if (SQLiteVersion != null)
             {
                 SQLiteVersion.Set(context, SQLiteNative.EngineVersion);
+            }
+
+            if (CipherVersion != null)
+            {
+                CipherVersion.Set(context, SQLiteNative.CipherVersion ?? string.Empty);
             }
 
             if (Body == null)

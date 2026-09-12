@@ -139,6 +139,35 @@ SQLite Connect Scope
 
 ---
 
+## Encrypt a database, then use it
+
+```
+SQLite Set Password         DatabasePath: "C:\Data\orders.db"
+                            NewPassword:  in_Credential.Password    ' from an Orchestrator asset
+                            Result:       out_message
+
+SQLite Connect Scope        DatabasePath: "C:\Data\orders.db"
+                            Password:     in_Credential.Password
+└── SQLite Execute Query    "select * from orders"
+```
+
+Run **SQLite Set Password** outside the Connect Scope: encrypting rewrites the database file.
+To change the password later, put the current one in `Password` and the new one in `NewPassword`;
+to remove the encryption, leave `NewPassword` empty.
+
+---
+
+## Hand an encrypted extract to someone else
+
+```
+SQLite Backup Database   DatabasePath:    "C:\Data\orders.db"
+                         Password:        in_DbPassword
+                         DestinationPath: "D:\Share\orders-extract.db"
+                         BackupPassword:  in_SharePassword     ' the copy gets its own password
+```
+
+---
+
 ## Several robots writing to one database on a share
 
 ```

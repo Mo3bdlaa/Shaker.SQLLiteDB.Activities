@@ -10,8 +10,8 @@
 
     <PackageId>Shaker.SQLLiteDB.Activities</PackageId>
     <Title>Shaker SQLite Activities</Title>
-    <Description>UiPath activity library for SQLite databases. Uses the embedded SQLitePCLRaw (e_sqlite3) native engine, so no ODBC driver, no System.Data.SQLite installation and no machine level configuration are required. Supports concurrent readers (WAL), serialized writers guarded by a cross process lock file, transactions, bulk insert/upsert, batch execution and export to CSV, XLSX and JSON.</Description>
-    <PackageTags>UiPath;Activities;RPA;SQLite;Database;WAL;CSV;Excel;XLSX;Workflow</PackageTags>
+    <Description>UiPath activity library for SQLite databases. Uses an embedded SQLitePCLRaw (SQLCipher) native engine, so no ODBC driver, no System.Data.SQLite installation and no machine level configuration are required, and AES-256 encrypted databases work out of the box. Supports concurrent readers (WAL), serialized writers guarded by a cross process lock file, transactions, bulk insert/upsert, batch execution and export to CSV, XLSX and JSON.</Description>
+    <PackageTags>UiPath;Activities;RPA;SQLite;SQLCipher;Encryption;Database;WAL;CSV;Excel;XLSX;Workflow</PackageTags>
     <PackageProjectUrl>https://github.com/Mo3bdlaa/Shaker.SQLLiteDB.Activities</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Mo3bdlaa/Shaker.SQLLiteDB.Activities</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -38,11 +38,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Embedded SQLite engine: the native e_sqlite3 library ships inside the package,
-         nothing has to be installed or registered on the robot machine. -->
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.10" />
+    <!-- Embedded SQLite engine: the native SQLCipher build of SQLite ships inside the package, so
+         nothing has to be installed or registered on the robot machine and encrypted databases work
+         out of the box. It is a superset of plain SQLite: databases without a password behave exactly
+         as before. -->
+    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="8.0.10" />
     <PackageReference Include="SQLitePCLRaw.core" Version="2.1.10" />
-    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.10" />
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlcipher" Version="2.1.10" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">

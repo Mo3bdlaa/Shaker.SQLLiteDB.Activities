@@ -140,7 +140,15 @@ Works, and the lock file is what makes it work — but keep in mind:
 
 For reporting on a busy database, take a snapshot with **SQLite Backup Database** and read from the copy.
 The backup uses the SQLite online backup API, so it is consistent even while writes are happening —
-unlike copying the file with a File activity.
+unlike copying the file with a File activity. Encrypted databases are copied with SQLCipher's export
+instead, which reads a consistent WAL snapshot.
+
+### Encrypted databases
+
+Encryption changes nothing about the concurrency model: an encrypted database still uses WAL, still
+allows many readers, and still takes the same writer lock. The one activity that behaves differently is
+**SQLite Set Password**, which replaces the database file when it encrypts or decrypts: it takes the
+writer lock, and the database must not be open anywhere else at that moment.
 
 ---
 

@@ -8,7 +8,8 @@ namespace Shaker.SQLLiteDB.Activities.Activities
 {
     /// <summary>
     /// Copies a live database to another file with the SQLite online backup API. Unlike copying the
-    /// file by hand this is safe while other robots are reading and writing.
+    /// file by hand this is safe while other robots are reading and writing. Encrypted databases are
+    /// copied with SQLCipher's own export, and the copy can be given a different password.
     /// </summary>
     [DisplayName("SQLite Backup Database")]
     [Description("Creates a consistent copy of the database with the online backup API, safe to run while the database is in use.")]
@@ -26,6 +27,11 @@ namespace Shaker.SQLLiteDB.Activities.Activities
         public InArgument<string> DestinationPath { get; set; }
 
         [Category("Options")]
+        [DisplayName("Backup password")]
+        [Description("Password of the copy. Empty keeps the password of the source, so an encrypted database is backed up encrypted.")]
+        public InArgument<string> BackupPassword { get; set; }
+
+        [Category("Options")]
         [DisplayName("Overwrite")]
         [Description("Replace the destination file when it already exists.")]
         public bool Overwrite { get; set; } = true;
@@ -40,6 +46,7 @@ namespace Shaker.SQLLiteDB.Activities.Activities
             var request = ResolveConnection(context);
             var destination = DestinationPath.Get(context);
             var overwrite = Overwrite;
+            var backupPassword = GetValue(BackupPassword, context, null);
             var size = new long[1];
 
             return new SQLiteRun
@@ -66,16 +73,30 @@ namespace Shaker.SQLLiteDB.Activities.Activities
 
                     using (var lease = request.Acquire())
                     {
-                        lease.Handle.Execute((connection, transaction) =>
-                        {
-                            using (var target = new SqliteConnection("Data Source=" + fullPath + ";Mode=ReadWriteCreate"))
-                            {
-                                target.Open();
-                                connection.BackupDatabase(target);
-                            }
+                        var sourcePassword = lease.Handle.Settings.Password;
 
-                            return 0;
-                        }, cancellationToken);
+                        if (!string.IsNullOrEmpty(sourcePassword) || !string.IsNullOrEmpty(backupPassword))
+                        {
+                            // The ADO.NET online backup API refuses encrypted databases, and it cannot
+                            // set a password on the copy either, so SQLCipher's own export is used.
+                            var source = lease.Handle.Settings.Clone();
+                            SQLiteEncryption.ExportTo(source, fullPath,
+                                string.IsNullOrEmpty(backupPassword) ? sourcePassword : backupPassword,
+                                cancellationToken);
+                        }
+                        else
+                        {
+                            lease.Handle.Execute((connection, transaction) =>
+                            {
+                                using (var target = new SqliteConnection("Data Source=" + fullPath + ";Mode=ReadWriteCreate"))
+                                {
+                                    target.Open();
+                                    connection.BackupDatabase(target);
+                                }
+
+                                return 0;
+                            }, cancellationToken);
+                        }
                     }
 
                     size[0] = new FileInfo(fullPath).Length;

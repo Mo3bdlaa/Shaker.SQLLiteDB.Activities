@@ -20,13 +20,20 @@
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageReleaseNotes>Fixes "not compatible with Windows projects": the assembly is now compiled against System.Activities 6.0.0.0, the version UiPath Studio ships, instead of the newer 6.0.3.0 from nuget.org.</PackageReleaseNotes>
+    <PackageReleaseNotes>The package now carries the SQLite stack and the native engine inside lib/ and declares no dependencies, so installing it requires nothing to be resolved from a feed.</PackageReleaseNotes>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PackageOutputPath>$(ArtifactsDirectory)</PackageOutputPath>
 
     <!-- UiPath Studio reads these to place the package in the activity panel. -->
-    <NoWarn>$(NoWarn);NU5100;CS1591</NoWarn>
+    <NoWarn>$(NoWarn);NU5100;NU5128;CS1591</NoWarn>
+
+    <!-- The package carries its dependencies inside lib/ instead of declaring them. That is what the
+         activity packages Studio accepts look like, and it is also what "no ODBC driver and nothing to
+         install" should mean: one file with everything in it, nothing for Studio to resolve. -->
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);BundleDependencyAssemblies</TargetsForTfmSpecificBuildOutput>
   </PropertyGroup>
 
   <ItemGroup>
@@ -48,6 +55,7 @@
     <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="8.0.10" />
     <PackageReference Include="SQLitePCLRaw.core" Version="2.1.10" />
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlcipher" Version="2.1.10" />
+    <PackageReference Include="SQLitePCLRaw.lib.e_sqlcipher" Version="2.1.10" GeneratePathProperty="true" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
@@ -67,6 +75,37 @@
          be loaded by it, which Studio reports as "not compatible with Windows projects". This package
          from UiPath's own feed is the 6.0.0.0 build. -->
     <PackageReference Include="UiPath.Workflow.Runtime" Version="6.0.0-20220401-03" PrivateAssets="all" ExcludeAssets="runtime" />
+  </ItemGroup>
+
+  <!-- Everything the library needs at run time, packed beside our own assembly. Native files are
+       excluded here and added explicitly below: this build runs on Linux, so the native picked up
+       automatically would be the Linux one. -->
+  <Target Name="BundleDependencyAssemblies" DependsOnTargets="ResolveReferences">
+    <ItemGroup>
+      <!-- Only the SQLite stack. The .NET Framework build would otherwise drag in the whole set of
+           netstandard facade assemblies, which have no business inside an activity package. -->
+      <BundledDependency Include="@(ReferenceCopyLocalPaths)"
+                         Condition="'%(ReferenceCopyLocalPaths.Extension)' == '.dll' And (
+                                    '%(ReferenceCopyLocalPaths.Filename)' == 'Microsoft.Data.Sqlite' Or
+                                    '%(ReferenceCopyLocalPaths.Filename)' == 'SQLitePCLRaw.core' Or
+                                    '%(ReferenceCopyLocalPaths.Filename)' == 'SQLitePCLRaw.batteries_v2' Or
+                                    '%(ReferenceCopyLocalPaths.Filename)' == 'SQLitePCLRaw.provider.e_sqlcipher' Or
+                                    '%(ReferenceCopyLocalPaths.Filename)' == 'SQLitePCLRaw.provider.dynamic_cdecl')" />
+      <BuildOutputInPackage Include="@(BundledDependency)" />
+    </ItemGroup>
+  </Target>
+
+  <PropertyGroup>
+    <ESqlCipherNative>$(NuGetPackageRoot)sqlitepclraw.lib.e_sqlcipher/2.1.10/runtimes</ESqlCipherNative>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The native SQLCipher engine for Windows. x64 sits next to the assemblies, where both loaders
+         look first; the x86 and x64 sub folders cover the .NET Framework loader's own convention. -->
+    <None Include="$(ESqlCipherNative)/win-x64/native/e_sqlcipher.dll"
+          Pack="true" PackagePath="lib/net461/;lib/net461/x64/;lib/net6.0/;lib/net6.0/x64/" Visible="false" />
+    <None Include="$(ESqlCipherNative)/win-x86/native/e_sqlcipher.dll"
+          Pack="true" PackagePath="lib/net461/x86/;lib/net6.0/x86/" Visible="false" />
   </ItemGroup>
 
 </Project>

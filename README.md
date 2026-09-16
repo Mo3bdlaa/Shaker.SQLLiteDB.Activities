@@ -55,6 +55,10 @@ Two things decide whether Studio accepts the package at all, and both are easy t
 * **The lib folders.** `net461` and `net6.0`. Newer UiPath packages ship `net6.0-windows7.0`, but that
   is for newer Studio versions.
 
+The package also **declares no dependencies at all**: the SQLite stack and the native engine are packed
+inside `lib/`, so installing it never asks Studio to resolve anything from a feed. That is what "no ODBC
+driver and nothing to install" is supposed to mean, and it removes a whole class of install failures.
+
 1. Download `Shaker.SQLLiteDB.Activities.<version>.nupkg` from the
    [Releases page](https://github.com/Mo3bdlaa/Shaker.SQLLiteDB.Activities/releases),
    or build it yourself (see [Building from source](#building-from-source)).

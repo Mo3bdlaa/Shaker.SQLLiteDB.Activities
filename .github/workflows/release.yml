@@ -67,6 +67,11 @@ jobs:
           unzip -l *.nupkg | grep -q 'lib/net6.0/' || { echo 'missing lib/net6.0'; exit 1; }
           unzip -l *.nupkg | grep -q 'net6.0-windows' && { echo 'net6.0-windows makes Studio reject the package'; exit 1; }
           unzip -p *.nupkg '*.nuspec' | grep -q 'UiPath.Workflow' && { echo 'System.Activities must not be a package dependency'; exit 1; }
+          unzip -p *.nupkg '*.nuspec' | grep -q '<dependency ' && { echo 'the package must declare no dependencies; they are bundled in lib/'; exit 1; }
+          for tfm in net461 net6.0; do
+            unzip -l *.nupkg | grep -q "lib/$tfm/Microsoft.Data.Sqlite.dll" || { echo "lib/$tfm is missing the bundled SQLite stack"; exit 1; }
+            unzip -l *.nupkg | grep -q "lib/$tfm/e_sqlcipher.dll" || { echo "lib/$tfm is missing the native engine"; exit 1; }
+          done
 
           # Studio ships System.Activities 6.0.0.0. An assembly compiled against a higher version
           # cannot be loaded by it, and Studio then reports the whole package as incompatible with

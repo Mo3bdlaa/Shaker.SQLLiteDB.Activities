@@ -13,6 +13,9 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Maintenance
     [Category("SQLite.Advanced")]
     [DisplayName("SQLite Attach Database")]
     [Description("Attaches another database file to the connection under an alias, so queries can span both files.")]
+#if NET6_0_OR_GREATER
+    [System.Activities.ViewModels.ViewModelClass(typeof(Shaker.SQLLiteDB.Activities.Design.SQLiteAttachDatabaseViewModel))]
+#endif
     public class SQLiteAttachDatabase : SQLiteActivityBase<bool>
     {
         public SQLiteAttachDatabase()

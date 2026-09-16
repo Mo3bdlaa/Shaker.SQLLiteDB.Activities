@@ -20,13 +20,14 @@
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>package-icon.png</PackageIcon>
-    <PackageReleaseNotes>Adds a package icon, a scope free SQLite Connect activity in the style of UiPath Database Connect, and groups the activities by job in the activity panel.</PackageReleaseNotes>
+    <PackageReleaseNotes>Every activity now draws its main fields inside the activity itself - connection, SQL, table, file, result - instead of hiding everything in the Properties panel, the way the UiPath Database activities do. Needs the UiPath Official package feed enabled, for System.Activities.ViewModels. Version 1.2.0 is the same library without the designers.</PackageReleaseNotes>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PackageOutputPath>$(ArtifactsDirectory)</PackageOutputPath>
 
     <!-- UiPath Studio reads these to place the package in the activity panel. -->
-    <NoWarn>$(NoWarn);NU5100;NU5128;CS1591</NoWarn>
+    <!-- NU5104: System.Activities.ViewModels only ever ships with a prerelease version string. -->
+    <NoWarn>$(NoWarn);NU5100;NU5104;NU5128;CS1591</NoWarn>
 
     <!-- The package carries its dependencies inside lib/ instead of declaring them: nothing for Studio
          to resolve when it installs. The references below are marked PrivateAssets="all" to achieve
@@ -78,6 +79,17 @@
          be loaded by it, which Studio reports as "not compatible with Windows projects". This package
          from UiPath's own feed is the 6.0.0.0 build. -->
     <PackageReference Include="UiPath.Workflow.Runtime" Version="6.0.0-20220401-03" PrivateAssets="all" ExcludeAssets="runtime" />
+
+    <!-- The designer view models: the fields drawn inside the activity body, instead of only in the
+         Properties panel. This one IS declared as a package dependency, unlike everything else here.
+         It has to be: the workflow runtime reads every attribute on an activity through
+         TypeDescriptor before running it, so the attribute type must resolve on the robot too, not
+         only in Studio. UiPath's own Database activities declare the same dependency for the same
+         reason. Studio and the robot restore it from the UiPath Official feed, which is enabled out
+         of the box. The version is the oldest one built for net6.0, so it covers the widest range of
+         Studio releases; its assembly version is 1.0.0.0, as it is in every other published version,
+         so a newer Studio happily binds our assembly to its own newer copy. -->
+    <PackageReference Include="System.Activities.ViewModels" Version="1.0.0-20231101.6" />
   </ItemGroup>
 
   <!-- Everything the library needs at run time, packed beside our own assembly. Native files are

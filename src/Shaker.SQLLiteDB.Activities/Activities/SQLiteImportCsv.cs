@@ -12,6 +12,9 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Export
     [Category("SQLite.Export")]
     [DisplayName("SQLite Import CSV")]
     [Description("Loads a CSV file into a table, in batches, with the same conflict handling as the bulk insert.")]
+#if NET6_0_OR_GREATER
+    [System.Activities.ViewModels.ViewModelClass(typeof(Shaker.SQLLiteDB.Activities.Design.SQLiteImportCsvViewModel))]
+#endif
     public class SQLiteImportCsv : SQLiteActivityBase<int>
     {
         public SQLiteImportCsv()

@@ -17,6 +17,9 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Maintenance
     [Category("SQLite.Maintenance")]
     [DisplayName("SQLite Set Password")]
     [Description("Encrypts a database with AES-256 (SQLCipher), changes its password, or removes the encryption.")]
+#if NET6_0_OR_GREATER
+    [System.Activities.ViewModels.ViewModelClass(typeof(Shaker.SQLLiteDB.Activities.Design.SQLiteSetPasswordViewModel))]
+#endif
     public class SQLiteSetPassword : SQLiteActivityBase<string>
     {
         public SQLiteSetPassword()

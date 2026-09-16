@@ -15,6 +15,9 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Export
     [Category("SQLite.Export")]
     [DisplayName("SQLite Export To Excel")]
     [Description("Writes a query result, a table or a DataTable to an .xlsx workbook. No Excel installation and no extra library needed.")]
+#if NET6_0_OR_GREATER
+    [System.Activities.ViewModels.ViewModelClass(typeof(Shaker.SQLLiteDB.Activities.Design.SQLiteExportToExcelViewModel))]
+#endif
     public class SQLiteExportToExcel : SQLiteExportBase<string>
     {
         public SQLiteExportToExcel()

@@ -15,6 +15,9 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Maintenance
     [Category("SQLite.Maintenance")]
     [DisplayName("SQLite Backup Database")]
     [Description("Creates a consistent copy of the database with the online backup API, safe to run while the database is in use.")]
+#if NET6_0_OR_GREATER
+    [System.Activities.ViewModels.ViewModelClass(typeof(Shaker.SQLLiteDB.Activities.Design.SQLiteBackupDatabaseViewModel))]
+#endif
     public class SQLiteBackupDatabase : SQLiteActivityBase<string>
     {
         public SQLiteBackupDatabase()

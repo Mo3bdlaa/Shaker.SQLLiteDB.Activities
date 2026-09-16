@@ -11,6 +11,9 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Schema
     [Category("SQLite.Schema")]
     [DisplayName("SQLite Table Exists")]
     [Description("Returns true when the given table or view exists in the database.")]
+#if NET6_0_OR_GREATER
+    [System.Activities.ViewModels.ViewModelClass(typeof(Shaker.SQLLiteDB.Activities.Design.SQLiteTableExistsViewModel))]
+#endif
     public class SQLiteTableExists : SQLiteActivityBase<bool>
     {
         public SQLiteTableExists()
@@ -46,6 +49,9 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Schema
     [Category("SQLite.Schema")]
     [DisplayName("SQLite Get Table Names")]
     [Description("Returns the names of the tables, and optionally the views, of the database.")]
+#if NET6_0_OR_GREATER
+    [System.Activities.ViewModels.ViewModelClass(typeof(Shaker.SQLLiteDB.Activities.Design.SQLiteGetTableNamesViewModel))]
+#endif
     public class SQLiteGetTableNames : SQLiteActivityBase<List<string>>
     {
         public SQLiteGetTableNames()
@@ -86,6 +92,9 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Schema
     [Category("SQLite.Advanced")]
     [DisplayName("SQLite Get Table Schema")]
     [Description("Returns the columns of a table as a DataTable: ordinal, name, declared type, not null, default value and primary key flag.")]
+#if NET6_0_OR_GREATER
+    [System.Activities.ViewModels.ViewModelClass(typeof(Shaker.SQLLiteDB.Activities.Design.SQLiteGetTableSchemaViewModel))]
+#endif
     public class SQLiteGetTableSchema : SQLiteActivityBase<DataTable>
     {
         public SQLiteGetTableSchema()
@@ -121,6 +130,9 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Schema
     [Category("SQLite.Advanced")]
     [DisplayName("SQLite Create Table")]
     [Description("Creates a table from the shape of a DataTable, mapping .NET types onto SQLite storage classes.")]
+#if NET6_0_OR_GREATER
+    [System.Activities.ViewModels.ViewModelClass(typeof(Shaker.SQLLiteDB.Activities.Design.SQLiteCreateTableViewModel))]
+#endif
     public class SQLiteCreateTable : SQLiteActivityBase<bool>
     {
         public SQLiteCreateTable()

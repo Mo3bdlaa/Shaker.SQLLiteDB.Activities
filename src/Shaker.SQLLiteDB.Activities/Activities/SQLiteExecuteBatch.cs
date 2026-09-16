@@ -15,6 +15,9 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Write
     [Category("SQLite.Advanced")]
     [DisplayName("SQLite Execute Batch")]
     [Description("Runs several write statements in one transaction while holding the writer lock once.")]
+#if NET6_0_OR_GREATER
+    [System.Activities.ViewModels.ViewModelClass(typeof(Shaker.SQLLiteDB.Activities.Design.SQLiteExecuteBatchViewModel))]
+#endif
     public class SQLiteExecuteBatch : SQLiteActivityBase<int>
     {
         public SQLiteExecuteBatch()

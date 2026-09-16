@@ -55,12 +55,21 @@ Two things decide whether Studio accepts the package at all, and both are easy t
 * **The lib folders.** `net461` and `net6.0`. Newer UiPath packages ship `net6.0-windows7.0`, but that
   is for newer Studio versions.
 
-The package also **declares no dependencies at all**: the SQLite stack and the native engine are packed
-inside `lib/`, so installing it never asks Studio to resolve anything from a feed. That is what "no ODBC
-driver and nothing to install" is supposed to mean, and it removes a whole class of install failures.
+The SQLite stack and the native engine are packed inside `lib/`, so installing the package never asks
+Studio to resolve any of that from a feed. That is what "no ODBC driver and nothing to install" is
+supposed to mean, and it removes a whole class of install failures.
 
-One subtlety worth knowing if you ever repackage this: the empty `<dependencies>` **groups** must stay in
-the manifest. Studio reads the target frameworks from those groups to decide which project types the
+**One** dependency is declared, `System.Activities.ViewModels`, and it is the one that draws the fields
+inside each activity instead of burying them in the Properties panel. It cannot be bundled: the workflow
+runtime reads every attribute on an activity through `TypeDescriptor` before running it, so the assembly
+has to resolve on the robot too, not only in Studio. UiPath's own Database activities declare the same
+dependency for the same reason, and Studio and the robot both restore it from the **UiPath Official**
+feed, which is enabled out of the box. If that feed is turned off in your environment, install
+[**1.2.0**](https://github.com/Mo3bdlaa/Shaker.SQLLiteDB.Activities/releases) instead — same library, no
+designers, no dependencies.
+
+One subtlety worth knowing if you ever repackage this: the `<dependencies>` **groups** must stay in
+the manifest, even when a group is empty. Studio reads the target frameworks from those groups to decide which project types the
 package supports. Bundling the dependencies with `SuppressDependenciesWhenPacking` removes the whole
 element, and Studio then reports the package as *"not compatible with Windows projects"* and shows no
 version at all. Mark the references `PrivateAssets="all"` instead: the dependencies disappear, the groups
@@ -92,6 +101,11 @@ only reach for in specific situations — cross-process lock choreography, runni
 joining two database files, or building a table from a DataTable's shape.
 
 The quickest way to find any of them is to type **`SQLite`** in the panel's search box.
+
+Each activity shows the things you actually fill in — the connection, the SQL, the table, the file, the
+result — inside the activity itself, the way the UiPath Database activities do. Everything else (open
+mode, journal mode, locking, timeouts, encoding, conflict policy and so on) stays one click away in the
+**Properties** panel.
 
 If the panel stays empty, work through these in order:
 

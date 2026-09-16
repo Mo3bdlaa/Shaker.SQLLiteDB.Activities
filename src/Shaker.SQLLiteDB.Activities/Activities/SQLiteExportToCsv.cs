@@ -13,6 +13,9 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Export
     [Category("SQLite.Export")]
     [DisplayName("SQLite Export To CSV")]
     [Description("Writes a query result, a whole table or a DataTable to a CSV file, streaming row by row.")]
+#if NET6_0_OR_GREATER
+    [System.Activities.ViewModels.ViewModelClass(typeof(Shaker.SQLLiteDB.Activities.Design.SQLiteExportToCsvViewModel))]
+#endif
     public class SQLiteExportToCsv : SQLiteExportBase<string>
     {
         public SQLiteExportToCsv()

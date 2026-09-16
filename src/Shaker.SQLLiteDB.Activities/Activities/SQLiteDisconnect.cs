@@ -12,6 +12,9 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Connection
     [Category("SQLite.Connection")]
     [DisplayName("SQLite Disconnect")]
     [Description("Closes a SQLite connection that was opened outside a scope.")]
+#if NET6_0_OR_GREATER
+    [System.Activities.ViewModels.ViewModelClass(typeof(Shaker.SQLLiteDB.Activities.Design.SQLiteDisconnectViewModel))]
+#endif
     public class SQLiteDisconnect : CodeActivity<bool>
     {
         public SQLiteDisconnect()

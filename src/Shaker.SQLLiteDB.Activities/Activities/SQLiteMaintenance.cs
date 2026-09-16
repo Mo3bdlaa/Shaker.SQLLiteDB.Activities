@@ -15,6 +15,9 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Maintenance
     [Category("SQLite.Maintenance")]
     [DisplayName("SQLite Maintenance")]
     [Description("Runs VACUUM, ANALYZE, PRAGMA optimize, a WAL checkpoint, an integrity check, a foreign key check or REINDEX.")]
+#if NET6_0_OR_GREATER
+    [System.Activities.ViewModels.ViewModelClass(typeof(Shaker.SQLLiteDB.Activities.Design.SQLiteMaintenanceViewModel))]
+#endif
     public class SQLiteMaintenance : SQLiteActivityBase<string>
     {
         public SQLiteMaintenance()

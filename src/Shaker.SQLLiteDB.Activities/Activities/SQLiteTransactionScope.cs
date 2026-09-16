@@ -13,6 +13,9 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Connection
     [Category("SQLite.Connection")]
     [DisplayName("SQLite Transaction Scope")]
     [Description("Commits the activities inside as one unit of work and rolls everything back when one of them fails.")]
+#if NET6_0_OR_GREATER
+    [System.Activities.ViewModels.ViewModelClass(typeof(Shaker.SQLLiteDB.Activities.Design.SQLiteTransactionScopeViewModel))]
+#endif
     public class SQLiteTransactionScope : NativeActivity
     {
         private readonly Variable<SQLiteTransactionHandle> _transaction = new Variable<SQLiteTransactionHandle>("ShakerSQLiteTransaction");

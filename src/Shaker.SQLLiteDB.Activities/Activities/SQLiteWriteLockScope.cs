@@ -15,6 +15,9 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Connection
     [Category("SQLite.Advanced")]
     [DisplayName("SQLite Write Lock Scope")]
     [Description("Takes the cross process writer lock once and keeps it for all the activities inside.")]
+#if NET6_0_OR_GREATER
+    [System.Activities.ViewModels.ViewModelClass(typeof(Shaker.SQLLiteDB.Activities.Design.SQLiteWriteLockScopeViewModel))]
+#endif
     public class SQLiteWriteLockScope : NativeActivity
     {
         private readonly Variable<SQLiteLockToken> _token = new Variable<SQLiteLockToken>("ShakerSQLiteWriteLock");

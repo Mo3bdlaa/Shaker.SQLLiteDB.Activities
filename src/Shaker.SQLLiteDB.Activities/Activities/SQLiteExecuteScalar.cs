@@ -11,6 +11,9 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Query
     [Category("SQLite.Query")]
     [DisplayName("SQLite Execute Scalar")]
     [Description("Runs a statement and returns a single value, for example the result of a COUNT or a MAX.")]
+#if NET6_0_OR_GREATER
+    [System.Activities.ViewModels.ViewModelClass(typeof(Shaker.SQLLiteDB.Activities.Design.SQLiteExecuteScalarViewModel))]
+#endif
     public class SQLiteExecuteScalar : SQLiteStatementActivity<object>
     {
         public SQLiteExecuteScalar()

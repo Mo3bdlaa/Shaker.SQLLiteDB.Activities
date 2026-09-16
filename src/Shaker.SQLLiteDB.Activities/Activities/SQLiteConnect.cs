@@ -16,6 +16,9 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Connection
     [Category("SQLite.Connection")]
     [DisplayName("SQLite Connect")]
     [Description("Opens a SQLite database and returns the connection. No ODBC driver or SQLite installation is required.")]
+#if NET6_0_OR_GREATER
+    [System.Activities.ViewModels.ViewModelClass(typeof(Shaker.SQLLiteDB.Activities.Design.SQLiteConnectViewModel))]
+#endif
     public class SQLiteConnect : CodeActivity
     {
         public SQLiteConnect()

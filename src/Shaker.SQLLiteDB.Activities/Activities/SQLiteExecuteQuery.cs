@@ -13,6 +13,9 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Query
     [Category("SQLite.Query")]
     [DisplayName("SQLite Execute Query")]
     [Description("Runs a SELECT statement and returns a DataTable. Safe to run in parallel with other readers and with a writer.")]
+#if NET6_0_OR_GREATER
+    [System.Activities.ViewModels.ViewModelClass(typeof(Shaker.SQLLiteDB.Activities.Design.SQLiteExecuteQueryViewModel))]
+#endif
     public class SQLiteExecuteQuery : SQLiteStatementActivity<DataTable>
     {
         public SQLiteExecuteQuery()

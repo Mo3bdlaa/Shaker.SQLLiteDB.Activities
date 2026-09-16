@@ -19,6 +19,9 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Query
     [Category("SQLite.Advanced")]
     [DisplayName("SQLite Parallel Query")]
     [Description("Runs several queries concurrently, each on its own read connection, and returns one DataTable per query.")]
+#if NET6_0_OR_GREATER
+    [System.Activities.ViewModels.ViewModelClass(typeof(Shaker.SQLLiteDB.Activities.Design.SQLiteParallelQueryViewModel))]
+#endif
     public class SQLiteParallelQuery : SQLiteActivityBase<Dictionary<string, DataTable>>
     {
         public SQLiteParallelQuery()

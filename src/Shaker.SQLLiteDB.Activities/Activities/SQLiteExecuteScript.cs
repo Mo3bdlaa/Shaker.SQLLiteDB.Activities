@@ -13,6 +13,9 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Write
     [Category("SQLite.Write")]
     [DisplayName("SQLite Execute Script")]
     [Description("Runs a multi statement SQL script from text or from a .sql file, optionally as one transaction.")]
+#if NET6_0_OR_GREATER
+    [System.Activities.ViewModels.ViewModelClass(typeof(Shaker.SQLLiteDB.Activities.Design.SQLiteExecuteScriptViewModel))]
+#endif
     public class SQLiteExecuteScript : SQLiteActivityBase<int>
     {
         public SQLiteExecuteScript()

@@ -14,6 +14,9 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Export
     [Category("SQLite.Advanced")]
     [DisplayName("SQLite Export To JSON")]
     [Description("Turns a query result into a JSON array of objects, written to a file or returned as text.")]
+#if NET6_0_OR_GREATER
+    [System.Activities.ViewModels.ViewModelClass(typeof(Shaker.SQLLiteDB.Activities.Design.SQLiteExportToJsonViewModel))]
+#endif
     public class SQLiteExportToJson : SQLiteExportBase<string>
     {
         public SQLiteExportToJson()

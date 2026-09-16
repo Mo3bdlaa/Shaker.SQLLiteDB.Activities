@@ -12,6 +12,9 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Write
     [Category("SQLite.Write")]
     [DisplayName("SQLite Execute Non Query")]
     [Description("Runs an INSERT, UPDATE, DELETE or DDL statement. Writers are serialized through the writer lock.")]
+#if NET6_0_OR_GREATER
+    [System.Activities.ViewModels.ViewModelClass(typeof(Shaker.SQLLiteDB.Activities.Design.SQLiteExecuteNonQueryViewModel))]
+#endif
     public class SQLiteExecuteNonQuery : SQLiteStatementActivity<int>
     {
         public SQLiteExecuteNonQuery()

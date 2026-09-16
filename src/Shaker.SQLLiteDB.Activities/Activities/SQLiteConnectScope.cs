@@ -15,6 +15,9 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Connection
     [Category("SQLite.Advanced")]
     [DisplayName("SQLite Connect Scope")]
     [Description("Opens a SQLite database and keeps the connection open for the activities inside. No ODBC driver or SQLite installation is required.")]
+#if NET6_0_OR_GREATER
+    [System.Activities.ViewModels.ViewModelClass(typeof(Shaker.SQLLiteDB.Activities.Design.SQLiteConnectScopeViewModel))]
+#endif
     public class SQLiteConnectScope : NativeActivity
     {
         private readonly Variable<SQLiteConnectionHandle> _handle = new Variable<SQLiteConnectionHandle>("ShakerSQLiteHandle");

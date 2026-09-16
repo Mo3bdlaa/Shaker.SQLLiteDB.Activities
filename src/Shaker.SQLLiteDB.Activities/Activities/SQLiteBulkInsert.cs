@@ -14,6 +14,9 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Write
     [Category("SQLite.Write")]
     [DisplayName("SQLite Bulk Insert")]
     [Description("Writes a DataTable into a table in batches. Handles conflicts with ignore, replace or upsert, and can create the table from the DataTable.")]
+#if NET6_0_OR_GREATER
+    [System.Activities.ViewModels.ViewModelClass(typeof(Shaker.SQLLiteDB.Activities.Design.SQLiteBulkInsertViewModel))]
+#endif
     public class SQLiteBulkInsert : SQLiteActivityBase<int>
     {
         public SQLiteBulkInsert()

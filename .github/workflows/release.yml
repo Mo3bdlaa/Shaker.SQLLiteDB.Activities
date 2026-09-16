@@ -65,9 +65,22 @@ jobs:
           unzip -l *.nupkg | grep -E 'lib/' || true
           unzip -l *.nupkg | grep -q 'lib/net461/' || { echo 'missing lib/net461'; exit 1; }
           unzip -l *.nupkg | grep -q 'lib/net6.0/' || { echo 'missing lib/net6.0'; exit 1; }
+          unzip -l *.nupkg | grep -q 'System.Activities.ViewModels.dll' && { echo 'the view models assembly is restored, never bundled'; exit 1; }
           unzip -l *.nupkg | grep -q 'net6.0-windows' && { echo 'net6.0-windows makes Studio reject the package'; exit 1; }
           unzip -p *.nupkg '*.nuspec' | grep -q 'UiPath.Workflow' && { echo 'System.Activities must not be a package dependency'; exit 1; }
-          unzip -p *.nupkg '*.nuspec' | grep -q '<dependency ' && { echo 'the package must declare no dependencies; they are bundled in lib/'; exit 1; }
+          # Exactly one declared dependency is allowed: System.Activities.ViewModels, which carries the
+          # designer layout and has to resolve on the robot as well, so it cannot be bundled. The
+          # SQLite stack ships inside lib/ and must never turn back into a dependency.
+          DEPS=$(unzip -p *.nupkg '*.nuspec' | grep '<dependency ' || true)
+          echo "$DEPS"
+          case "$DEPS" in
+            *'id="System.Activities.ViewModels"'*) ;;
+            *) echo 'the designer view models dependency is missing'; exit 1 ;;
+          esac
+          if [ "$(printf '%s\n' "$DEPS" | grep -c '<dependency ')" != 1 ]; then
+            echo 'only System.Activities.ViewModels may be declared, in the net6.0 group; the SQLite stack is bundled in lib/'
+            exit 1
+          fi
 
           # The dependency groups themselves must stay, even though they are empty: Studio reads the
           # target frameworks from them to decide which project types the package supports, and with

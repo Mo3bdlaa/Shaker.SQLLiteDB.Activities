@@ -58,13 +58,16 @@ jobs:
       - name: Check the package layout
         shell: bash
         run: |
-          # A UiPath activity package has to ship lib/net461 and lib/net6.0-windows7.0, and must not
-          # carry its own System.Activities: the Studio and robot hosts provide that one.
+          # The layout Studio accepts, which is the one UiPath ships itself: a Windows assembly, a
+          # cross-platform one, no .NET Framework assembly, and no System.Activities of our own - the
+          # Studio and robot hosts provide that.
           cd artifacts
           unzip -l *.nupkg | grep -E 'lib/' || true
-          unzip -l *.nupkg | grep -q 'lib/net461/' || { echo 'missing lib/net461'; exit 1; }
           unzip -l *.nupkg | grep -q 'lib/net6.0-windows7.0/' || { echo 'missing lib/net6.0-windows7.0'; exit 1; }
-          unzip -p *.nupkg '*.nuspec' | grep -q 'UiPath.Workflow.Runtime' && { echo 'System.Activities must not be a package dependency'; exit 1; }
+          unzip -l *.nupkg | grep -q 'lib/net6.0/' || { echo 'missing lib/net6.0'; exit 1; }
+          unzip -l *.nupkg | grep -q 'lib/net4' && { echo 'a .NET Framework assembly makes Studio reject the package for Windows projects'; exit 1; }
+          unzip -p *.nupkg '*.nuspec' | grep -q 'frameworkAssembly' && { echo 'frameworkAssemblies must not be present'; exit 1; }
+          unzip -p *.nupkg '*.nuspec' | grep -q 'UiPath.Workflow' && { echo 'System.Activities must not be a package dependency'; exit 1; }
           echo 'package layout ok'
 
       - name: Publish the release

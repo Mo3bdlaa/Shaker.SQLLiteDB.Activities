@@ -5,7 +5,7 @@
     <Authors>Shaker</Authors>
     <Product>Shaker SQLite Activities for UiPath</Product>
     <Copyright>Copyright (c) Shaker</Copyright>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
     <LangVersion>latest</LangVersion>
     <NeutralLanguage>en-US</NeutralLanguage>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>

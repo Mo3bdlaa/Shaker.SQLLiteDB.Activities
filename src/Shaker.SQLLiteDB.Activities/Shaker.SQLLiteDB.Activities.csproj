@@ -1,13 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!-- The same pair UiPath's own activity packages ship:
-         net6.0-windows => UiPath "Windows" projects (packs as lib/net6.0-windows7.0)
-         net6.0         => UiPath "Cross-platform" projects
-         Windows - Legacy (net461) is deliberately not built: Studio refused the package for Windows
-         projects while a .NET Framework assembly was in it, and UiPath dropped that target from their
-         own packages too. -->
-    <TargetFrameworks>net6.0;net6.0-windows</TargetFrameworks>
+    <!-- net461 => UiPath "Windows - Legacy" projects
+         net6.0 => UiPath "Windows" projects
+         Studio matches a Windows project against the plain net6.0 folder. The windows flavoured
+         net6.0-windows7.0 is what newer UiPath packages ship, but Studio 2022.10 rejects a package
+         that offers it, so this library stays on the pair that Studio accepts. -->
+    <TargetFrameworks>net461;net6.0</TargetFrameworks>
     <RootNamespace>Shaker.SQLLiteDB.Activities</RootNamespace>
     <AssemblyName>Shaker.SQLLiteDB.Activities</AssemblyName>
     <AssemblyTitle>Shaker SQLite Activities</AssemblyTitle>
@@ -21,7 +20,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageReleaseNotes>Ships the same target frameworks as UiPath own activity packages (net6.0-windows7.0 and net6.0) so Studio accepts the package for Windows projects. Windows - Legacy is no longer supported.</PackageReleaseNotes>
+    <PackageReleaseNotes>Fixes "not compatible with Windows projects" in Studio: the package ships lib/net461 and lib/net6.0, the pair Studio matches a Windows project against.</PackageReleaseNotes>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PackageOutputPath>$(ArtifactsDirectory)</PackageOutputPath>
@@ -51,11 +50,20 @@
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlcipher" Version="2.1.10" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+    <Reference Include="System.Activities" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
     <!-- System.Activities for modern .NET. Compile time only, exactly like System.Activities is on
          .NET Framework: the workflow host - UiPath Studio and the robot - brings its own copy at run
-         time, and shipping a second one as a package dependency gives the project two System.Activities
-         assemblies, which is enough for Studio to stop recognising the activities. -->
+         time, and shipping a second one as a package dependency is what stopped Studio from taking
+         the 1.0.0 package. -->
     <PackageReference Include="UiPath.Workflow.Runtime" Version="6.0.3" PrivateAssets="all" ExcludeAssets="runtime" />
   </ItemGroup>
 

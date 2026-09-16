@@ -24,9 +24,9 @@ namespace Shaker.SQLLiteDB.Activities.Activities
 
         /// <summary>Connection opened by a SQLite Connect Scope. Leave empty when the activity runs on its own.</summary>
         [Category("Connection")]
-        [DisplayName("Existing connection")]
-        [Description("Connection handed over by a SQLite Connect Scope. Leave it empty to let this activity open and close its own connection.")]
-        public InArgument<SQLiteConnectionHandle> ExistingConnection { get; set; }
+        [DisplayName("Connection")]
+        [Description("Connection from SQLite Connect, or from an enclosing SQLite Connect Scope. Leave it empty to work straight from 'Database path' instead.")]
+        public InArgument<SQLiteConnectionHandle> Connection { get; set; }
 
         /// <summary>Path of the database file, used when no scope provides a connection.</summary>
         [Category("Connection")]
@@ -203,7 +203,7 @@ namespace Shaker.SQLLiteDB.Activities.Activities
         protected SQLiteConnectionRequest ResolveConnection(NativeActivityContext context)
         {
             var ambientLock = SQLiteExecutionProperties.FindWriteLock(context);
-            var handle = GetValue(ExistingConnection, context, null) ?? SQLiteExecutionProperties.FindConnection(context);
+            var handle = GetValue(Connection, context, null) ?? SQLiteExecutionProperties.FindConnection(context);
 
             if (handle != null)
             {

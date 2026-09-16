@@ -62,7 +62,7 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Query
 
             // Every reader needs its own connection, so the settings are taken either from the enclosing
             // scope or from this activity, and a fresh connection is opened per query.
-            var handle = GetValue(ExistingConnection, context, null) ?? SQLiteExecutionProperties.FindConnection(context);
+            var handle = GetValue(Connection, context, null) ?? SQLiteExecutionProperties.FindConnection(context);
             var settings = handle != null ? handle.Settings.Clone() : BuildSettings(context);
 
             if (OpenReadOnly && !settings.IsInMemory)

@@ -23,7 +23,7 @@ namespace Shaker.SQLLiteDB.Activities.Activities
         public SQLiteLockToken AmbientLock { get; private set; }
 
         /// <summary>True when the connection comes from an enclosing scope and must not be closed here.</summary>
-        public bool UsesExistingConnection
+        public bool UsesConnection
         {
             get { return _existingHandle != null; }
         }

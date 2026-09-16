@@ -32,9 +32,9 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Connection
         public ActivityAction<SQLiteConnectionHandle> Body { get; set; }
 
         [Category("Connection")]
-        [DisplayName("Existing connection")]
+        [DisplayName("Connection")]
         [Description("Connection to work on. Leave empty when the scope sits inside a SQLite Connect Scope.")]
-        public InArgument<SQLiteConnectionHandle> ExistingConnection { get; set; }
+        public InArgument<SQLiteConnectionHandle> Connection { get; set; }
 
         [Category("Transaction")]
         [DisplayName("Transaction mode")]
@@ -70,7 +70,7 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Connection
 
         protected override void Execute(NativeActivityContext context)
         {
-            var handle = (ExistingConnection == null ? null : ExistingConnection.Get(context))
+            var handle = (Connection == null ? null : Connection.Get(context))
                          ?? SQLiteExecutionProperties.FindConnection(context);
 
             if (handle == null)
@@ -131,14 +131,14 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Connection
 
         private void OnBodyCompleted(NativeActivityContext context, ActivityInstance instance)
         {
-            var handle = (ExistingConnection == null ? null : ExistingConnection.Get(context))
+            var handle = (Connection == null ? null : Connection.Get(context))
                          ?? SQLiteExecutionProperties.FindConnection(context);
             Complete(context, handle, true);
         }
 
         private void OnBodyFaulted(NativeActivityFaultContext faultContext, Exception propagatedException, ActivityInstance propagatedFrom)
         {
-            var handle = (ExistingConnection == null ? null : ExistingConnection.Get(faultContext))
+            var handle = (Connection == null ? null : Connection.Get(faultContext))
                          ?? SQLiteExecutionProperties.FindConnection(faultContext);
             Complete(faultContext, handle, false);
         }
@@ -195,7 +195,7 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Connection
         {
             base.Cancel(context);
 
-            var handle = (ExistingConnection == null ? null : ExistingConnection.Get(context))
+            var handle = (Connection == null ? null : Connection.Get(context))
                          ?? SQLiteExecutionProperties.FindConnection(context);
             Complete(context, handle, false);
         }

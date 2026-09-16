@@ -46,7 +46,7 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Maintenance
 
         protected override SQLiteRun CreateRun(NativeActivityContext context)
         {
-            var existing = GetValue(ExistingConnection, context, null) ?? SQLiteExecutionProperties.FindConnection(context);
+            var existing = GetValue(Connection, context, null) ?? SQLiteExecutionProperties.FindConnection(context);
             var newPassword = GetValue(NewPassword, context, null) ?? string.Empty;
             var currentPassword = GetValue(Password, context, null) ?? string.Empty;
             var keepBackup = KeepBackup;

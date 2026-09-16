@@ -33,9 +33,9 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Connection
         public ActivityAction<SQLiteLockToken> Body { get; set; }
 
         [Category("Connection")]
-        [DisplayName("Existing connection")]
+        [DisplayName("Connection")]
         [Description("Connection whose database should be locked. Leave empty inside a SQLite Connect Scope.")]
-        public InArgument<SQLiteConnectionHandle> ExistingConnection { get; set; }
+        public InArgument<SQLiteConnectionHandle> Connection { get; set; }
 
         [Category("Connection")]
         [DisplayName("Database path")]
@@ -75,7 +75,7 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Connection
 
         protected override void Execute(NativeActivityContext context)
         {
-            var handle = (ExistingConnection == null ? null : ExistingConnection.Get(context))
+            var handle = (Connection == null ? null : Connection.Get(context))
                          ?? SQLiteExecutionProperties.FindConnection(context);
 
             var databasePath = DatabasePath == null ? null : DatabasePath.Get(context);
@@ -149,7 +149,7 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Connection
 
             _token.Set(context, null);
 
-            var handle = (ExistingConnection == null ? null : ExistingConnection.Get(context))
+            var handle = (Connection == null ? null : Connection.Get(context))
                          ?? SQLiteExecutionProperties.FindConnection(context);
 
             if (handle != null && ReferenceEquals(handle.AmbientLock, token))

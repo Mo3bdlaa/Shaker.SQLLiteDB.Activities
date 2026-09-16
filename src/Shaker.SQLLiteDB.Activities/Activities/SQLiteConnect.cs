@@ -16,7 +16,7 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Connection
     [Category("SQLite.Connection")]
     [DisplayName("SQLite Connect")]
     [Description("Opens a SQLite database and returns the connection. No ODBC driver or SQLite installation is required.")]
-    public class SQLiteConnect : CodeActivity<SQLiteConnectionHandle>
+    public class SQLiteConnect : CodeActivity
     {
         public SQLiteConnect()
         {
@@ -89,6 +89,12 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Connection
 
         #region Output
 
+        /// <summary>The open connection. Hand it to the other activities, and to SQLite Disconnect.</summary>
+        [Category("Output")]
+        [DisplayName("Connection")]
+        [Description("The open connection. Pass it to the other SQLite activities, and close it with SQLite Disconnect.")]
+        public OutArgument<SQLiteConnectionHandle> Connection { get; set; }
+
         [Category("Output")]
         [DisplayName("SQLite version")]
         [Description("Version of the embedded SQLite engine, for example 3.45.1.")]
@@ -96,7 +102,7 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Connection
 
         #endregion
 
-        protected override SQLiteConnectionHandle Execute(CodeActivityContext context)
+        protected override void Execute(CodeActivityContext context)
         {
             var connectionString = ConnectionString == null ? null : ConnectionString.Get(context);
             var databasePath = DatabasePath == null ? null : DatabasePath.Get(context);
@@ -125,12 +131,15 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Connection
 
             var handle = SQLiteConnectionHandle.Open(settings);
 
+            if (Connection != null)
+            {
+                Connection.Set(context, handle);
+            }
+
             if (SQLiteVersion != null)
             {
                 SQLiteVersion.Set(context, SQLiteNative.EngineVersion);
             }
-
-            return handle;
         }
     }
 }

@@ -640,7 +640,21 @@ namespace Shaker.SQLLiteDB.Activities.Tests
             // The UiPath Database pattern: Connect, use the connection, Disconnect. No scope anywhere.
             using var db = new TestDatabase();
 
-            var connection = WorkflowInvoker.Invoke(new SQLiteConnect { DatabasePath = db.Path });
+            var connectionVariable = new Variable<SQLiteConnectionHandle>();
+            SQLiteConnectionHandle connection = null;
+
+            var connectSequence = new System.Activities.Statements.Sequence { Variables = { connectionVariable } };
+            connectSequence.Activities.Add(new SQLiteConnect
+            {
+                DatabasePath = db.Path,
+                Connection = new OutArgument<SQLiteConnectionHandle>(connectionVariable)
+            });
+            connectSequence.Activities.Add(new Capture<SQLiteConnectionHandle>
+            {
+                Value = new InArgument<SQLiteConnectionHandle>(connectionVariable),
+                OnValue = h => connection = h
+            });
+            WorkflowInvoker.Invoke(connectSequence);
 
             try
             {
@@ -648,13 +662,13 @@ namespace Shaker.SQLLiteDB.Activities.Tests
 
                 WorkflowInvoker.Invoke(new SQLiteExecuteNonQuery
                 {
-                    ExistingConnection = new InArgument<SQLiteConnectionHandle>(context => connection),
+                    Connection = new InArgument<SQLiteConnectionHandle>(context => connection),
                     Sql = "create table t (id integer primary key, name text);"
                 });
 
                 var affected = WorkflowInvoker.Invoke(new SQLiteExecuteNonQuery
                 {
-                    ExistingConnection = new InArgument<SQLiteConnectionHandle>(context => connection),
+                    Connection = new InArgument<SQLiteConnectionHandle>(context => connection),
                     Sql = "insert into t (name) values ('through a plain connection');"
                 });
 
@@ -662,7 +676,7 @@ namespace Shaker.SQLLiteDB.Activities.Tests
 
                 var table = WorkflowInvoker.Invoke(new SQLiteExecuteQuery
                 {
-                    ExistingConnection = new InArgument<SQLiteConnectionHandle>(context => connection),
+                    Connection = new InArgument<SQLiteConnectionHandle>(context => connection),
                     Sql = "select name from t;"
                 });
 

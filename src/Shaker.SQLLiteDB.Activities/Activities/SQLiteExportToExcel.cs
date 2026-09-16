@@ -2,15 +2,17 @@ using System.Activities;
 using System.Collections.Generic;
 using System.ComponentModel;
 using Shaker.SQLLiteDB.Activities.Core;
+using Shaker.SQLLiteDB.Activities.Activities;
 using Shaker.SQLLiteDB.Activities.IO;
 
-namespace Shaker.SQLLiteDB.Activities.Activities
+namespace Shaker.SQLLiteDB.Activities.Activities.Export
 {
     /// <summary>
     /// Writes query results to a real .xlsx workbook. The file is produced by this package itself, so
     /// Excel does not have to be installed and no Open XML library is pulled into the project.
     /// Several queries can be written to one workbook, one worksheet each.
     /// </summary>
+    [Category("SQLite.Export")]
     [DisplayName("SQLite Export To Excel")]
     [Description("Writes a query result, a table or a DataTable to an .xlsx workbook. No Excel installation and no extra library needed.")]
     public class SQLiteExportToExcel : SQLiteExportBase<string>

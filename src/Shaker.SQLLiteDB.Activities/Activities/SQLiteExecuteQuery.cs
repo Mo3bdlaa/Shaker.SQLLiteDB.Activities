@@ -2,13 +2,15 @@ using System.Activities;
 using System.ComponentModel;
 using System.Data;
 using Shaker.SQLLiteDB.Activities.Core;
+using Shaker.SQLLiteDB.Activities.Activities;
 
-namespace Shaker.SQLLiteDB.Activities.Activities
+namespace Shaker.SQLLiteDB.Activities.Activities.Query
 {
     /// <summary>
     /// Runs a SELECT and returns the result as a DataTable. Reads never take the writer lock, so any
     /// number of robots can read the same database at the same time while another one writes.
     /// </summary>
+    [Category("SQLite.Query")]
     [DisplayName("SQLite Execute Query")]
     [Description("Runs a SELECT statement and returns a DataTable. Safe to run in parallel with other readers and with a writer.")]
     public class SQLiteExecuteQuery : SQLiteStatementActivity<DataTable>

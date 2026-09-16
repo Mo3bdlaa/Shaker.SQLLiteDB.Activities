@@ -2,14 +2,16 @@ using System.Activities;
 using System.ComponentModel;
 using System.Data;
 using Shaker.SQLLiteDB.Activities.Core;
+using Shaker.SQLLiteDB.Activities.Activities;
 using Shaker.SQLLiteDB.Activities.IO;
 
-namespace Shaker.SQLLiteDB.Activities.Activities
+namespace Shaker.SQLLiteDB.Activities.Activities.Export
 {
     /// <summary>
     /// Exports a query result, a table or a DataTable to JSON, either into a file or straight into a
     /// String variable, ready to be posted to an API.
     /// </summary>
+    [Category("SQLite.Export")]
     [DisplayName("SQLite Export To JSON")]
     [Description("Turns a query result into a JSON array of objects, written to a file or returned as text.")]
     public class SQLiteExportToJson : SQLiteExportBase<string>

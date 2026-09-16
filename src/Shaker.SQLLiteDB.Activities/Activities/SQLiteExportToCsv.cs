@@ -1,14 +1,16 @@
 using System.Activities;
 using System.ComponentModel;
 using Shaker.SQLLiteDB.Activities.Core;
+using Shaker.SQLLiteDB.Activities.Activities;
 using Shaker.SQLLiteDB.Activities.IO;
 
-namespace Shaker.SQLLiteDB.Activities.Activities
+namespace Shaker.SQLLiteDB.Activities.Activities.Export
 {
     /// <summary>
     /// Exports a query result, a table or a DataTable to a CSV file. The rows are streamed, so files of
     /// any size can be written without loading everything into memory.
     /// </summary>
+    [Category("SQLite.Export")]
     [DisplayName("SQLite Export To CSV")]
     [Description("Writes a query result, a whole table or a DataTable to a CSV file, streaming row by row.")]
     public class SQLiteExportToCsv : SQLiteExportBase<string>

@@ -19,7 +19,8 @@
     <RepositoryUrl>https://github.com/Mo3bdlaa/Shaker.SQLLiteDB.Activities</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageReleaseNotes>Fixes "not compatible with Windows projects": the manifest keeps its target framework groups, which Studio reads to decide which project types the package supports.</PackageReleaseNotes>
+    <PackageIcon>package-icon.png</PackageIcon>
+    <PackageReleaseNotes>Adds a package icon, a scope free SQLite Connect activity in the style of UiPath Database Connect, and groups the activities by job in the activity panel.</PackageReleaseNotes>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PackageOutputPath>$(ArtifactsDirectory)</PackageOutputPath>
@@ -46,6 +47,7 @@
 
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\assets\package-icon.png" Pack="true" PackagePath="\" Visible="false" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,13 +1,15 @@
 using System.Activities;
 using System.ComponentModel;
 using Shaker.SQLLiteDB.Activities.Core;
+using Shaker.SQLLiteDB.Activities.Activities;
 
-namespace Shaker.SQLLiteDB.Activities.Activities
+namespace Shaker.SQLLiteDB.Activities.Activities.Write
 {
     /// <summary>
     /// Runs an INSERT, UPDATE, DELETE or DDL statement and returns the number of affected rows.
     /// The writer lock is taken for the duration of the statement, unless an enclosing scope already holds it.
     /// </summary>
+    [Category("SQLite.Write")]
     [DisplayName("SQLite Execute Non Query")]
     [Description("Runs an INSERT, UPDATE, DELETE or DDL statement. Writers are serialized through the writer lock.")]
     public class SQLiteExecuteNonQuery : SQLiteStatementActivity<int>

@@ -3,14 +3,16 @@ using System.Activities;
 using System.ComponentModel;
 using System.Threading;
 using Shaker.SQLLiteDB.Activities.Core;
+using Shaker.SQLLiteDB.Activities.Activities;
 
-namespace Shaker.SQLLiteDB.Activities.Activities
+namespace Shaker.SQLLiteDB.Activities.Activities.Connection
 {
     /// <summary>
     /// Holds the writer lock for everything inside it. Use it when several write activities belong
     /// together, so that no other process can slip a write in between, and so that the lock is taken
     /// once instead of once per activity.
     /// </summary>
+    [Category("SQLite.Connection")]
     [DisplayName("SQLite Write Lock Scope")]
     [Description("Takes the cross process writer lock once and keeps it for all the activities inside.")]
     public class SQLiteWriteLockScope : NativeActivity

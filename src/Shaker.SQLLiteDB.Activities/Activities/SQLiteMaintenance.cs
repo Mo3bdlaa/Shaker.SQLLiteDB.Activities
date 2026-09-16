@@ -4,13 +4,15 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Text;
 using Shaker.SQLLiteDB.Activities.Core;
+using Shaker.SQLLiteDB.Activities.Activities;
 
-namespace Shaker.SQLLiteDB.Activities.Activities
+namespace Shaker.SQLLiteDB.Activities.Activities.Maintenance
 {
     /// <summary>
     /// Housekeeping for a SQLite database: VACUUM, ANALYZE, WAL checkpoint, integrity check and so on.
     /// Handy at the end of a long running process, or in a nightly job.
     /// </summary>
+    [Category("SQLite.Maintenance")]
     [DisplayName("SQLite Maintenance")]
     [Description("Runs VACUUM, ANALYZE, PRAGMA optimize, a WAL checkpoint, an integrity check, a foreign key check or REINDEX.")]
     public class SQLiteMaintenance : SQLiteActivityBase<string>

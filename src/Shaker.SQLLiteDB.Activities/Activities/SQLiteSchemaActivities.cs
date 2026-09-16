@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using Shaker.SQLLiteDB.Activities.Core;
+using Shaker.SQLLiteDB.Activities.Activities;
 
-namespace Shaker.SQLLiteDB.Activities.Activities
+namespace Shaker.SQLLiteDB.Activities.Activities.Schema
 {
     /// <summary>Checks whether a table or a view exists.</summary>
+    [Category("SQLite.Schema")]
     [DisplayName("SQLite Table Exists")]
     [Description("Returns true when the given table or view exists in the database.")]
     public class SQLiteTableExists : SQLiteActivityBase<bool>
@@ -41,6 +43,7 @@ namespace Shaker.SQLLiteDB.Activities.Activities
     }
 
     /// <summary>Lists the tables of a database.</summary>
+    [Category("SQLite.Schema")]
     [DisplayName("SQLite Get Table Names")]
     [Description("Returns the names of the tables, and optionally the views, of the database.")]
     public class SQLiteGetTableNames : SQLiteActivityBase<List<string>>
@@ -80,6 +83,7 @@ namespace Shaker.SQLLiteDB.Activities.Activities
     }
 
     /// <summary>Returns the columns of a table with their types and constraints.</summary>
+    [Category("SQLite.Schema")]
     [DisplayName("SQLite Get Table Schema")]
     [Description("Returns the columns of a table as a DataTable: ordinal, name, declared type, not null, default value and primary key flag.")]
     public class SQLiteGetTableSchema : SQLiteActivityBase<DataTable>
@@ -114,6 +118,7 @@ namespace Shaker.SQLLiteDB.Activities.Activities
     }
 
     /// <summary>Creates a table whose columns match a DataTable.</summary>
+    [Category("SQLite.Schema")]
     [DisplayName("SQLite Create Table")]
     [Description("Creates a table from the shape of a DataTable, mapping .NET types onto SQLite storage classes.")]
     public class SQLiteCreateTable : SQLiteActivityBase<bool>

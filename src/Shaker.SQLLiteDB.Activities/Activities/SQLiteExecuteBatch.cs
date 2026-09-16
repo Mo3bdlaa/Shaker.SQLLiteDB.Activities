@@ -4,13 +4,15 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using Shaker.SQLLiteDB.Activities.Core;
+using Shaker.SQLLiteDB.Activities.Activities;
 
-namespace Shaker.SQLLiteDB.Activities.Activities
+namespace Shaker.SQLLiteDB.Activities.Activities.Write
 {
     /// <summary>
     /// Runs a list of write statements as one unit of work, holding the writer lock once for the whole
     /// batch. This is the activity to use when a workflow has to apply many different writes at once.
     /// </summary>
+    [Category("SQLite.Write")]
     [DisplayName("SQLite Execute Batch")]
     [Description("Runs several write statements in one transaction while holding the writer lock once.")]
     public class SQLiteExecuteBatch : SQLiteActivityBase<int>

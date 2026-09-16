@@ -2,13 +2,15 @@ using System.Activities;
 using System.Collections.Generic;
 using System.ComponentModel;
 using Shaker.SQLLiteDB.Activities.Core;
+using Shaker.SQLLiteDB.Activities.Activities;
 
-namespace Shaker.SQLLiteDB.Activities.Activities
+namespace Shaker.SQLLiteDB.Activities.Activities.Maintenance
 {
     /// <summary>
     /// Attaches a second database file to the current connection, so one query can join tables from
     /// both files, for example <c>select * from main.orders join archive.orders_2023 …</c>.
     /// </summary>
+    [Category("SQLite.Maintenance")]
     [DisplayName("SQLite Attach Database")]
     [Description("Attaches another database file to the connection under an alias, so queries can span both files.")]
     public class SQLiteAttachDatabase : SQLiteActivityBase<bool>

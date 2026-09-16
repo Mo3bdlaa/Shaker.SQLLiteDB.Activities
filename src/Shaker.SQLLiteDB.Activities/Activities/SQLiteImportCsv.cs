@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using Shaker.SQLLiteDB.Activities.Core;
+using Shaker.SQLLiteDB.Activities.Activities;
 using Shaker.SQLLiteDB.Activities.IO;
 
-namespace Shaker.SQLLiteDB.Activities.Activities
+namespace Shaker.SQLLiteDB.Activities.Activities.Export
 {
     /// <summary>Reads a CSV file and writes it into a table, creating the table when asked to.</summary>
+    [Category("SQLite.Export")]
     [DisplayName("SQLite Import CSV")]
     [Description("Loads a CSV file into a table, in batches, with the same conflict handling as the bulk insert.")]
     public class SQLiteImportCsv : SQLiteActivityBase<int>

@@ -3,14 +3,16 @@ using System.ComponentModel;
 using System.IO;
 using Microsoft.Data.Sqlite;
 using Shaker.SQLLiteDB.Activities.Core;
+using Shaker.SQLLiteDB.Activities.Activities;
 
-namespace Shaker.SQLLiteDB.Activities.Activities
+namespace Shaker.SQLLiteDB.Activities.Activities.Maintenance
 {
     /// <summary>
     /// Copies a live database to another file with the SQLite online backup API. Unlike copying the
     /// file by hand this is safe while other robots are reading and writing. Encrypted databases are
     /// copied with SQLCipher's own export, and the copy can be given a different password.
     /// </summary>
+    [Category("SQLite.Maintenance")]
     [DisplayName("SQLite Backup Database")]
     [Description("Creates a consistent copy of the database with the online backup API, safe to run while the database is in use.")]
     public class SQLiteBackupDatabase : SQLiteActivityBase<string>

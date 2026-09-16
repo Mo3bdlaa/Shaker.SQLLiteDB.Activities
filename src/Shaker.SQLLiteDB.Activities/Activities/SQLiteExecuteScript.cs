@@ -2,13 +2,15 @@ using System.Activities;
 using System.ComponentModel;
 using System.IO;
 using Shaker.SQLLiteDB.Activities.Core;
+using Shaker.SQLLiteDB.Activities.Activities;
 
-namespace Shaker.SQLLiteDB.Activities.Activities
+namespace Shaker.SQLLiteDB.Activities.Activities.Write
 {
     /// <summary>
     /// Runs a script that contains several statements, taken from a string or from a .sql file.
     /// Useful for schema migrations and seed data.
     /// </summary>
+    [Category("SQLite.Write")]
     [DisplayName("SQLite Execute Script")]
     [Description("Runs a multi statement SQL script from text or from a .sql file, optionally as one transaction.")]
     public class SQLiteExecuteScript : SQLiteActivityBase<int>

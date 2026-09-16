@@ -5,6 +5,12 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using Shaker.SQLLiteDB.Activities.Activities;
+using Shaker.SQLLiteDB.Activities.Activities.Connection;
+using Shaker.SQLLiteDB.Activities.Activities.Query;
+using Shaker.SQLLiteDB.Activities.Activities.Write;
+using Shaker.SQLLiteDB.Activities.Activities.Export;
+using Shaker.SQLLiteDB.Activities.Activities.Schema;
+using Shaker.SQLLiteDB.Activities.Activities.Maintenance;
 using Shaker.SQLLiteDB.Activities.Core;
 using Xunit;
 
@@ -625,6 +631,72 @@ namespace Shaker.SQLLiteDB.Activities.Tests
 
             Assert.NotNull(captured);
             Assert.False(captured.IsOpen);
+        }
+
+
+        [Fact]
+        public void ConnectAndDisconnectWorkWithoutAnyScope()
+        {
+            // The UiPath Database pattern: Connect, use the connection, Disconnect. No scope anywhere.
+            using var db = new TestDatabase();
+
+            var connection = WorkflowInvoker.Invoke(new SQLiteConnect { DatabasePath = db.Path });
+
+            try
+            {
+                Assert.True(connection.IsOpen);
+
+                WorkflowInvoker.Invoke(new SQLiteExecuteNonQuery
+                {
+                    ExistingConnection = new InArgument<SQLiteConnectionHandle>(context => connection),
+                    Sql = "create table t (id integer primary key, name text);"
+                });
+
+                var affected = WorkflowInvoker.Invoke(new SQLiteExecuteNonQuery
+                {
+                    ExistingConnection = new InArgument<SQLiteConnectionHandle>(context => connection),
+                    Sql = "insert into t (name) values ('through a plain connection');"
+                });
+
+                Assert.Equal(1, affected);
+
+                var table = WorkflowInvoker.Invoke(new SQLiteExecuteQuery
+                {
+                    ExistingConnection = new InArgument<SQLiteConnectionHandle>(context => connection),
+                    Sql = "select name from t;"
+                });
+
+                Assert.Equal("through a plain connection", table.Rows[0]["name"]);
+            }
+            finally
+            {
+                var closed = WorkflowInvoker.Invoke(new SQLiteDisconnect
+                {
+                    Connection = new InArgument<SQLiteConnectionHandle>(context => connection)
+                });
+
+                Assert.True(closed);
+                Assert.False(connection.IsOpen);
+            }
+        }
+
+        [Fact]
+        public void ConnectReportsTheEngineVersion()
+        {
+            using var db = new TestDatabase();
+            var version = new Variable<string>();
+            string captured = null;
+
+            var sequence = new System.Activities.Statements.Sequence { Variables = { version } };
+            sequence.Activities.Add(new SQLiteConnect
+            {
+                DatabasePath = db.Path,
+                SQLiteVersion = new OutArgument<string>(version)
+            });
+            sequence.Activities.Add(new Capture<string> { Value = new InArgument<string>(version), OnValue = v => captured = v });
+
+            WorkflowInvoker.Invoke(sequence);
+            Assert.StartsWith("3.", captured);
         }
 
         private static string Flatten(Exception exception)

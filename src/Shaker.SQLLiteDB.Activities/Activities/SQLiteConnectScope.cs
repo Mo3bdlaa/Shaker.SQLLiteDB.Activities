@@ -3,14 +3,16 @@ using System.Activities;
 using System.Collections.Generic;
 using System.ComponentModel;
 using Shaker.SQLLiteDB.Activities.Core;
+using Shaker.SQLLiteDB.Activities.Activities;
 
-namespace Shaker.SQLLiteDB.Activities.Activities
+namespace Shaker.SQLLiteDB.Activities.Activities.Connection
 {
     /// <summary>
     /// Opens a SQLite database, runs the activities inside it and closes the connection afterwards,
     /// also when something fails. Every SQLite activity placed inside the scope picks the connection
     /// up automatically.
     /// </summary>
+    [Category("SQLite.Connection")]
     [DisplayName("SQLite Connect Scope")]
     [Description("Opens a SQLite database and keeps the connection open for the activities inside. No ODBC driver or SQLite installation is required.")]
     public class SQLiteConnectScope : NativeActivity

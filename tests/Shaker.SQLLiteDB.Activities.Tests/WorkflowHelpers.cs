@@ -3,6 +3,12 @@ using System.Activities;
 using System.Activities.Statements;
 using System.Collections.Generic;
 using Shaker.SQLLiteDB.Activities.Activities;
+using Shaker.SQLLiteDB.Activities.Activities.Connection;
+using Shaker.SQLLiteDB.Activities.Activities.Query;
+using Shaker.SQLLiteDB.Activities.Activities.Write;
+using Shaker.SQLLiteDB.Activities.Activities.Export;
+using Shaker.SQLLiteDB.Activities.Activities.Schema;
+using Shaker.SQLLiteDB.Activities.Activities.Maintenance;
 using Shaker.SQLLiteDB.Activities.Core;
 
 namespace Shaker.SQLLiteDB.Activities.Tests

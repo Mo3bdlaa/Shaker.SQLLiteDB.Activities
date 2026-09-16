@@ -2,13 +2,15 @@ using System;
 using System.Activities;
 using System.ComponentModel;
 using Shaker.SQLLiteDB.Activities.Core;
+using Shaker.SQLLiteDB.Activities.Activities;
 
-namespace Shaker.SQLLiteDB.Activities.Activities
+namespace Shaker.SQLLiteDB.Activities.Activities.Connection
 {
     /// <summary>
     /// Runs the activities inside one transaction: everything is committed together, or nothing is.
     /// Nested transaction scopes use a SAVEPOINT, so an inner scope can fail without discarding the outer work.
     /// </summary>
+    [Category("SQLite.Connection")]
     [DisplayName("SQLite Transaction Scope")]
     [Description("Commits the activities inside as one unit of work and rolls everything back when one of them fails.")]
     public class SQLiteTransactionScope : NativeActivity

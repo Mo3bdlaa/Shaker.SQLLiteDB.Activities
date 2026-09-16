@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using Shaker.SQLLiteDB.Activities.Core;
+using Shaker.SQLLiteDB.Activities.Activities;
 
-namespace Shaker.SQLLiteDB.Activities.Activities
+namespace Shaker.SQLLiteDB.Activities.Activities.Write
 {
     /// <summary>
     /// Writes a whole DataTable into a table with one prepared statement and batched transactions.
     /// Supports insert, insert or ignore, replace and UPSERT (insert or update).
     /// </summary>
+    [Category("SQLite.Write")]
     [DisplayName("SQLite Bulk Insert")]
     [Description("Writes a DataTable into a table in batches. Handles conflicts with ignore, replace or upsert, and can create the table from the DataTable.")]
     public class SQLiteBulkInsert : SQLiteActivityBase<int>

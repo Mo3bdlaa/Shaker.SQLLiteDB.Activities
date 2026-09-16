@@ -2,8 +2,9 @@ using System.Activities;
 using System.ComponentModel;
 using System.Globalization;
 using Shaker.SQLLiteDB.Activities.Core;
+using Shaker.SQLLiteDB.Activities.Activities;
 
-namespace Shaker.SQLLiteDB.Activities.Activities
+namespace Shaker.SQLLiteDB.Activities.Activities.Maintenance
 {
     /// <summary>
     /// Encrypts a database, changes the password of an encrypted one, or removes the encryption again.
@@ -13,6 +14,7 @@ namespace Shaker.SQLLiteDB.Activities.Activities
     /// database must not be in use: put this activity outside a SQLite Connect Scope.
     /// </para>
     /// </summary>
+    [Category("SQLite.Maintenance")]
     [DisplayName("SQLite Set Password")]
     [Description("Encrypts a database with AES-256 (SQLCipher), changes its password, or removes the encryption.")]
     public class SQLiteSetPassword : SQLiteActivityBase<string>

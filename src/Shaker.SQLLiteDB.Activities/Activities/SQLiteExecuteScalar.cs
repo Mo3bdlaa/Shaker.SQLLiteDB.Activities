@@ -3,10 +3,12 @@ using System.Activities;
 using System.ComponentModel;
 using System.Globalization;
 using Shaker.SQLLiteDB.Activities.Core;
+using Shaker.SQLLiteDB.Activities.Activities;
 
-namespace Shaker.SQLLiteDB.Activities.Activities
+namespace Shaker.SQLLiteDB.Activities.Activities.Query
 {
     /// <summary>Runs a statement and returns the first column of the first row, for example a COUNT(*).</summary>
+    [Category("SQLite.Query")]
     [DisplayName("SQLite Execute Scalar")]
     [Description("Runs a statement and returns a single value, for example the result of a COUNT or a MAX.")]
     public class SQLiteExecuteScalar : SQLiteStatementActivity<object>

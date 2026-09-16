@@ -1,13 +1,15 @@
 using System.Activities;
 using System.ComponentModel;
 using Shaker.SQLLiteDB.Activities.Core;
+using Shaker.SQLLiteDB.Activities.Activities;
 
-namespace Shaker.SQLLiteDB.Activities.Activities
+namespace Shaker.SQLLiteDB.Activities.Activities.Connection
 {
     /// <summary>
     /// Closes a connection that was opened without a scope. A SQLite Connect Scope closes its own
     /// connection, so this activity is only needed when the connection is passed around by hand.
     /// </summary>
+    [Category("SQLite.Connection")]
     [DisplayName("SQLite Disconnect")]
     [Description("Closes a SQLite connection that was opened outside a scope.")]
     public class SQLiteDisconnect : CodeActivity<bool>

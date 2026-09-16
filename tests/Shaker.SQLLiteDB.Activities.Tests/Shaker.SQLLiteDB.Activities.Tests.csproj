@@ -16,7 +16,7 @@
     <PackageReference Include="xunit" Version="2.9.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
     <!-- The workflow host supplies System.Activities at run time; in the tests that host is us. -->
-    <PackageReference Include="UiPath.Workflow.Runtime" Version="6.0.3" />
+    <PackageReference Include="UiPath.Workflow.Runtime" Version="6.0.0-20220401-03" />
   </ItemGroup>
 
   <ItemGroup>

@@ -43,9 +43,17 @@ The package targets both UiPath project types:
 | Windows - Legacy | `net461` |
 | Windows | `net6.0` |
 
-Studio matches a **Windows** project against the plain `net6.0` folder. Newer UiPath packages ship
-`net6.0-windows7.0` instead, but Studio 2022.10 reports a package that offers it as *"not compatible
-with Windows projects"*, so this library stays on the pair that Studio accepts.
+Studio matches a **Windows** project against the plain `net6.0` folder.
+
+Two things decide whether Studio accepts the package at all, and both are easy to get wrong:
+
+* **The `System.Activities` version the assembly binds to.** Studio ships `6.0.0.0`. `UiPath.Workflow.Runtime`
+  on nuget.org is newer and produces a `6.0.3.0` reference, which Studio cannot load — it reports the
+  whole package as *"not compatible with Windows projects"*. The build therefore takes
+  `UiPath.Workflow.Runtime` from UiPath's own feed (see `NuGet.config`), which is the `6.0.0.0` build,
+  and references it with `PrivateAssets="all"` so it never becomes a package dependency.
+* **The lib folders.** `net461` and `net6.0`. Newer UiPath packages ship `net6.0-windows7.0`, but that
+  is for newer Studio versions.
 
 1. Download `Shaker.SQLLiteDB.Activities.<version>.nupkg` from the
    [Releases page](https://github.com/Mo3bdlaa/Shaker.SQLLiteDB.Activities/releases),

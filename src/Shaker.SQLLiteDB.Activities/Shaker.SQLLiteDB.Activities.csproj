@@ -20,7 +20,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageReleaseNotes>Fixes "not compatible with Windows projects" in Studio: the package ships lib/net461 and lib/net6.0, the pair Studio matches a Windows project against.</PackageReleaseNotes>
+    <PackageReleaseNotes>Fixes "not compatible with Windows projects": the assembly is now compiled against System.Activities 6.0.0.0, the version UiPath Studio ships, instead of the newer 6.0.3.0 from nuget.org.</PackageReleaseNotes>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PackageOutputPath>$(ArtifactsDirectory)</PackageOutputPath>
@@ -60,11 +60,13 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
-    <!-- System.Activities for modern .NET. Compile time only, exactly like System.Activities is on
-         .NET Framework: the workflow host - UiPath Studio and the robot - brings its own copy at run
-         time, and shipping a second one as a package dependency is what stopped Studio from taking
-         the 1.0.0 package. -->
-    <PackageReference Include="UiPath.Workflow.Runtime" Version="6.0.3" PrivateAssets="all" ExcludeAssets="runtime" />
+    <!-- System.Activities for modern .NET. Compile time only: the workflow host - Studio and the
+         robot - brings its own copy at run time.
+         The version matters. Studio ships System.Activities 6.0.0.0, and an assembly compiled against
+         a higher one (nuget.org's UiPath.Workflow.Runtime 6.0.3 produces a 6.0.3.0 reference) cannot
+         be loaded by it, which Studio reports as "not compatible with Windows projects". This package
+         from UiPath's own feed is the 6.0.0.0 build. -->
+    <PackageReference Include="UiPath.Workflow.Runtime" Version="6.0.0-20220401-03" PrivateAssets="all" ExcludeAssets="runtime" />
   </ItemGroup>
 
 </Project>

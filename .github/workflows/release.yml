@@ -67,6 +67,12 @@ jobs:
           unzip -l *.nupkg | grep -q 'lib/net6.0/' || { echo 'missing lib/net6.0'; exit 1; }
           unzip -l *.nupkg | grep -q 'net6.0-windows' && { echo 'net6.0-windows makes Studio reject the package'; exit 1; }
           unzip -p *.nupkg '*.nuspec' | grep -q 'UiPath.Workflow' && { echo 'System.Activities must not be a package dependency'; exit 1; }
+
+          # Studio ships System.Activities 6.0.0.0. An assembly compiled against a higher version
+          # cannot be loaded by it, and Studio then reports the whole package as incompatible with
+          # Windows projects, which is what happened to 1.0.1 through 1.0.3.
+          grep -q 'UiPath.Workflow.Runtime" Version="6.0.0-' ../src/Shaker.SQLLiteDB.Activities/Shaker.SQLLiteDB.Activities.csproj \
+            || { echo 'must compile against the 6.0.0.0 build of System.Activities'; exit 1; }
           echo 'package layout ok'
 
       - name: Publish the release

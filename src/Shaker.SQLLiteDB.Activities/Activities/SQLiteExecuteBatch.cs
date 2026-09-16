@@ -12,7 +12,7 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Write
     /// Runs a list of write statements as one unit of work, holding the writer lock once for the whole
     /// batch. This is the activity to use when a workflow has to apply many different writes at once.
     /// </summary>
-    [Category("SQLite.Write")]
+    [Category("SQLite.Advanced")]
     [DisplayName("SQLite Execute Batch")]
     [Description("Runs several write statements in one transaction while holding the writer lock once.")]
     public class SQLiteExecuteBatch : SQLiteActivityBase<int>

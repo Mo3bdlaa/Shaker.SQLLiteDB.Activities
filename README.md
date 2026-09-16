@@ -75,8 +75,23 @@ remain.
 
 ### Finding them in the Activities panel
 
-The 23 activities live under the **`Shaker.SQLLiteDB.Activities.Activities`** node of the panel, which is
-built from the namespace. The quickest way to see them is to type **`SQLite`** in the panel's search box.
+The 24 activities are grouped by the job they do, so the common ones are the ones you see first:
+
+| Group | Activities |
+| --- | --- |
+| **SQLite > Connection** | Connect, Disconnect, Transaction Scope |
+| **SQLite > Query** | Execute Query, Execute Scalar |
+| **SQLite > Write** | Execute Non Query, Bulk Insert, Execute Script |
+| **SQLite > Export** | Export To CSV, Export To Excel, Import CSV |
+| **SQLite > Schema** | Table Exists, Get Table Names |
+| **SQLite > Maintenance** | Backup Database, Set Password, Maintenance |
+| **SQLite > Advanced** | Connect Scope, Write Lock Scope, Parallel Query, Execute Batch, Attach Database, Create Table, Get Table Schema, Export To JSON |
+
+Everything you need for a normal automation is in the first six groups. **Advanced** holds the ones you
+only reach for in specific situations — cross-process lock choreography, running many queries at once,
+joining two database files, or building a table from a DataTable's shape.
+
+The quickest way to find any of them is to type **`SQLite`** in the panel's search box.
 
 If the panel stays empty, work through these in order:
 
@@ -86,17 +101,11 @@ If the panel stays empty, work through these in order:
    looks like it installed nothing.
 2. **Check the assembly actually loaded.** Open the **Imports** panel and look for
    `Shaker.SQLLiteDB.Activities.Activities`. If it is listed, the assembly loaded and the problem is
-   only the panel filter above. If it is missing, the package did not load — carry on to step 3.
-3. **Check the dependencies restored.** The package needs `Microsoft.Data.Sqlite.Core` and
-   `SQLitePCLRaw`, which Studio pulls from nuget.org. If your only package source is a local folder,
-   the package installs but its assembly cannot load, and nothing appears. Re-enable nuget.org in
-   Manage Packages → Settings and reinstall.
-4. **Reopen the project** after installing. Studio caches the activity list per project.
+   only the panel filter above.
+3. **Reopen the project** after installing. Studio caches the activity list per project.
 
-**Leave `nuget.org` enabled** as a package source while installing. The package depends on
-`Microsoft.Data.Sqlite.Core` and `SQLitePCLRaw`, and Studio restores those from there. If the only
-source is your local folder, the package installs but its assembly cannot load, and the activity panel
-stays empty.
+The package carries the whole SQLite stack inside it and declares no NuGet dependencies, so it installs
+and loads from a local folder with no other package source enabled.
 
 ---
 
@@ -149,12 +158,19 @@ SQLite Import CSV   FilePath: "C:\In\customers.csv"
 
 ## Activity reference
 
-### Scopes
+### Connecting
+
+| Activity | What it does |
+| --- | --- |
+| **SQLite Connect** | Opens the database once and hands you a `SQLiteConnectionHandle` in its **Connection** output. Pass that to every other activity, then close it with **SQLite Disconnect**. This is the simplest way to work — no scope to nest things inside. |
+| **SQLite Transaction Scope** | Commits everything inside as one unit of work, rolls back when an activity throws. Nested scopes use a `SAVEPOINT`, so an inner scope can fail without discarding the outer work. Takes the writer lock for the whole transaction by default. |
+| **SQLite Disconnect** | Closes a connection opened by **SQLite Connect**. |
+
+### Advanced scopes
 
 | Activity | What it does |
 | --- | --- |
 | **SQLite Connect Scope** | Opens the database and shares the connection with every SQLite activity inside it. Applies the PRAGMA tuning (WAL, busy timeout, synchronous, foreign keys) and closes the connection on success, on error and on cancellation. Also outputs the connection, if you prefer to pass it around by hand. |
-| **SQLite Transaction Scope** | Commits everything inside as one unit of work, rolls back when an activity throws. Nested scopes use a `SAVEPOINT`, so an inner scope can fail without discarding the outer work. Takes the writer lock for the whole transaction by default. |
 | **SQLite Write Lock Scope** | Takes the cross process writer lock once and holds it for everything inside, so a group of writes cannot be interleaved with another robot's writes. Reports how long it waited. |
 
 ### Reading
@@ -195,7 +211,6 @@ SQLite Import CSV   FilePath: "C:\In\customers.csv"
 | **SQLite Set Password** | Encrypts a database, changes its password, or removes the encryption. |
 | **SQLite Backup Database** | A consistent copy through the SQLite online backup API — safe while the database is in use, unlike copying the file. Encrypted databases are copied with SQLCipher's export, and the copy can get its own password. |
 | **SQLite Attach Database** | Attaches a second database file under an alias so one query can join both. |
-| **SQLite Disconnect** | Closes a connection that was opened outside a scope. |
 
 Every activity also has the usual UiPath properties: `TimeoutMS`, `ContinueOnError` (with an
 `ErrorMessage` output), and the connection properties that let it run standalone, without a scope.

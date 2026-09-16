@@ -12,7 +12,7 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Connection
     /// also when something fails. Every SQLite activity placed inside the scope picks the connection
     /// up automatically.
     /// </summary>
-    [Category("SQLite.Connection")]
+    [Category("SQLite.Advanced")]
     [DisplayName("SQLite Connect Scope")]
     [Description("Opens a SQLite database and keeps the connection open for the activities inside. No ODBC driver or SQLite installation is required.")]
     public class SQLiteConnectScope : NativeActivity

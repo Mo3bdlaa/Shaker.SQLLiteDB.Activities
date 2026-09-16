@@ -16,7 +16,7 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Query
     /// In WAL mode readers never block each other or the writer, so this is the fast way to collect
     /// the data for a report.
     /// </summary>
-    [Category("SQLite.Query")]
+    [Category("SQLite.Advanced")]
     [DisplayName("SQLite Parallel Query")]
     [Description("Runs several queries concurrently, each on its own read connection, and returns one DataTable per query.")]
     public class SQLiteParallelQuery : SQLiteActivityBase<Dictionary<string, DataTable>>

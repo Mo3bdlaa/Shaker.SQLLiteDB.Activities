@@ -83,7 +83,7 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Schema
     }
 
     /// <summary>Returns the columns of a table with their types and constraints.</summary>
-    [Category("SQLite.Schema")]
+    [Category("SQLite.Advanced")]
     [DisplayName("SQLite Get Table Schema")]
     [Description("Returns the columns of a table as a DataTable: ordinal, name, declared type, not null, default value and primary key flag.")]
     public class SQLiteGetTableSchema : SQLiteActivityBase<DataTable>
@@ -118,7 +118,7 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Schema
     }
 
     /// <summary>Creates a table whose columns match a DataTable.</summary>
-    [Category("SQLite.Schema")]
+    [Category("SQLite.Advanced")]
     [DisplayName("SQLite Create Table")]
     [Description("Creates a table from the shape of a DataTable, mapping .NET types onto SQLite storage classes.")]
     public class SQLiteCreateTable : SQLiteActivityBase<bool>

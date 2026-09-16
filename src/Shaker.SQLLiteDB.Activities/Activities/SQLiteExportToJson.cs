@@ -11,7 +11,7 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Export
     /// Exports a query result, a table or a DataTable to JSON, either into a file or straight into a
     /// String variable, ready to be posted to an API.
     /// </summary>
-    [Category("SQLite.Export")]
+    [Category("SQLite.Advanced")]
     [DisplayName("SQLite Export To JSON")]
     [Description("Turns a query result into a JSON array of objects, written to a file or returned as text.")]
     public class SQLiteExportToJson : SQLiteExportBase<string>

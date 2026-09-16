@@ -59,6 +59,13 @@ The package also **declares no dependencies at all**: the SQLite stack and the n
 inside `lib/`, so installing it never asks Studio to resolve anything from a feed. That is what "no ODBC
 driver and nothing to install" is supposed to mean, and it removes a whole class of install failures.
 
+One subtlety worth knowing if you ever repackage this: the empty `<dependencies>` **groups** must stay in
+the manifest. Studio reads the target frameworks from those groups to decide which project types the
+package supports. Bundling the dependencies with `SuppressDependenciesWhenPacking` removes the whole
+element, and Studio then reports the package as *"not compatible with Windows projects"* and shows no
+version at all. Mark the references `PrivateAssets="all"` instead: the dependencies disappear, the groups
+remain.
+
 1. Download `Shaker.SQLLiteDB.Activities.<version>.nupkg` from the
    [Releases page](https://github.com/Mo3bdlaa/Shaker.SQLLiteDB.Activities/releases),
    or build it yourself (see [Building from source](#building-from-source)).

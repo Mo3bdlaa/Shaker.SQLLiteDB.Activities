@@ -17,6 +17,10 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
     <!-- The workflow host supplies System.Activities at run time; in the tests that host is us. -->
     <PackageReference Include="UiPath.Workflow.Runtime" Version="6.0.0-20220401-03" />
+    <!-- The library ships these inside its package rather than flowing them to consumers, so the
+         tests, which use them directly, ask for them themselves. -->
+    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="8.0.10" />
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlcipher" Version="2.1.10" />
   </ItemGroup>
 
   <ItemGroup>

@@ -18,9 +18,8 @@
     <PackageProjectUrl>https://github.com/Mo3bdlaa/Shaker.SQLLiteDB.Activities</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Mo3bdlaa/Shaker.SQLLiteDB.Activities</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageReleaseNotes>The package now carries the SQLite stack and the native engine inside lib/ and declares no dependencies, so installing it requires nothing to be resolved from a feed.</PackageReleaseNotes>
+    <PackageReleaseNotes>Fixes "not compatible with Windows projects": the manifest keeps its target framework groups, which Studio reads to decide which project types the package supports.</PackageReleaseNotes>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PackageOutputPath>$(ArtifactsDirectory)</PackageOutputPath>
@@ -28,10 +27,12 @@
     <!-- UiPath Studio reads these to place the package in the activity panel. -->
     <NoWarn>$(NoWarn);NU5100;NU5128;CS1591</NoWarn>
 
-    <!-- The package carries its dependencies inside lib/ instead of declaring them. That is what the
-         activity packages Studio accepts look like, and it is also what "no ODBC driver and nothing to
-         install" should mean: one file with everything in it, nothing for Studio to resolve. -->
-    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <!-- The package carries its dependencies inside lib/ instead of declaring them: nothing for Studio
+         to resolve when it installs. The references below are marked PrivateAssets="all" to achieve
+         that, rather than SuppressDependenciesWhenPacking, because that property removes the whole
+         <dependencies> element from the manifest - and Studio reads the target framework groups in
+         there to decide which project types the package supports. With no element it concludes the
+         package supports nothing and reports it as not compatible with Windows projects. -->
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);BundleDependencyAssemblies</TargetsForTfmSpecificBuildOutput>
   </PropertyGroup>
@@ -52,10 +53,10 @@
          nothing has to be installed or registered on the robot machine and encrypted databases work
          out of the box. It is a superset of plain SQLite: databases without a password behave exactly
          as before. -->
-    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="8.0.10" />
-    <PackageReference Include="SQLitePCLRaw.core" Version="2.1.10" />
-    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlcipher" Version="2.1.10" />
-    <PackageReference Include="SQLitePCLRaw.lib.e_sqlcipher" Version="2.1.10" GeneratePathProperty="true" />
+    <PackageReference PrivateAssets="all" Include="Microsoft.Data.Sqlite.Core" Version="8.0.10" />
+    <PackageReference PrivateAssets="all" Include="SQLitePCLRaw.core" Version="2.1.10" />
+    <PackageReference PrivateAssets="all" Include="SQLitePCLRaw.bundle_e_sqlcipher" Version="2.1.10" />
+    <PackageReference PrivateAssets="all" Include="SQLitePCLRaw.lib.e_sqlcipher" Version="2.1.10" GeneratePathProperty="true" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">

@@ -40,8 +40,13 @@ The package targets both UiPath project types:
 
 | UiPath project | Target framework in the package |
 | --- | --- |
-| Windows - Legacy | `net461` |
 | Windows (.NET 6 / .NET 8) | `net6.0-windows7.0` |
+| Cross-platform | `net6.0` |
+
+**Windows - Legacy is not supported.** Studio refused the package for Windows projects while a .NET
+Framework (`net461`) assembly was present, so the package now ships the same two target frameworks as
+UiPath's own activity packages and nothing else. If you need a Legacy build, open an issue — it has to
+be a separate package.
 
 1. Download `Shaker.SQLLiteDB.Activities.<version>.nupkg` from the
    [Releases page](https://github.com/Mo3bdlaa/Shaker.SQLLiteDB.Activities/releases),

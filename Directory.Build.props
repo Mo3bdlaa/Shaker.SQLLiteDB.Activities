@@ -1,10 +1,10 @@
 <Project>
 
   <PropertyGroup>
-    <Company>Mohamed Shaker</Company>
-    <Authors>Mohamed Shaker</Authors>
+    <Company>Mohammed Shaker</Company>
+    <Authors>Mohammed Shaker</Authors>
     <Product>Shaker SQLite Activities for UiPath</Product>
-    <Copyright>Copyright (c) Mohamed Shaker</Copyright>
+    <Copyright>Copyright (c) Mohammed Shaker</Copyright>
     <Version>1.0.0</Version>
     <LangVersion>latest</LangVersion>
     <NeutralLanguage>en-US</NeutralLanguage>

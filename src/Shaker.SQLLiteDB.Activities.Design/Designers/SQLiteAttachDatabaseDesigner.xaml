@@ -20,8 +20,8 @@
   </sap:ActivityDesigner.Resources>
   <Grid Margin="4">
     <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="Auto" />
-      <ColumnDefinition Width="*" MinWidth="190" />
+      <ColumnDefinition Width="Auto" MinWidth="96" />
+      <ColumnDefinition Width="260" />
     </Grid.ColumnDefinitions>
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
@@ -30,17 +30,17 @@
     </Grid.RowDefinitions>
     <TextBlock Grid.Row="0" Grid.Column="0" Text="Connection" Margin="0,5,8,5" VerticalAlignment="Center" />
     <sapv:ExpressionTextBox x:Name="ConnectionBox" Grid.Row="0" Grid.Column="1" Margin="0,2"
-                            HintText="Connection"
+                            HintText="Connection variable"
                             OwnerActivity="{Binding Path=ModelItem}"
                             Expression="{Binding Path=ModelItem.Connection, Mode=TwoWay, Converter={StaticResource ArgumentToExpressionConverter}, ConverterParameter=In}" />
     <TextBlock Grid.Row="1" Grid.Column="0" Text="Database to attach" Margin="0,5,8,5" VerticalAlignment="Center" />
     <sapv:ExpressionTextBox x:Name="AttachPathBox" Grid.Row="1" Grid.Column="1" Margin="0,2"
-                            HintText="Path of the database file to attach"
+                            HintText="Second .db file"
                             OwnerActivity="{Binding Path=ModelItem}"
                             Expression="{Binding Path=ModelItem.AttachPath, Mode=TwoWay, Converter={StaticResource ArgumentToExpressionConverter}, ConverterParameter=In}" />
     <TextBlock Grid.Row="2" Grid.Column="0" Text="Alias" Margin="0,5,8,5" VerticalAlignment="Center" />
     <sapv:ExpressionTextBox x:Name="AliasBox" Grid.Row="2" Grid.Column="1" Margin="0,2"
-                            HintText="Name the attached database gets in SQL, for example 'archive'"
+                            HintText="Name to use in SQL"
                             OwnerActivity="{Binding Path=ModelItem}"
                             Expression="{Binding Path=ModelItem.Alias, Mode=TwoWay, Converter={StaticResource ArgumentToExpressionConverter}, ConverterParameter=In}" />
   </Grid>

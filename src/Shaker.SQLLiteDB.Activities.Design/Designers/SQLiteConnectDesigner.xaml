@@ -22,8 +22,8 @@
   </sap:ActivityDesigner.Resources>
   <Grid Margin="4">
     <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="Auto" />
-      <ColumnDefinition Width="*" MinWidth="190" />
+      <ColumnDefinition Width="Auto" MinWidth="96" />
+      <ColumnDefinition Width="260" />
     </Grid.ColumnDefinitions>
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
@@ -32,17 +32,17 @@
     </Grid.RowDefinitions>
     <TextBlock Grid.Row="0" Grid.Column="0" Text="Database path" Margin="0,5,8,5" VerticalAlignment="Center" />
     <sapv:ExpressionTextBox x:Name="DatabasePathBox" Grid.Row="0" Grid.Column="1" Margin="0,2"
-                            HintText="Full path of the SQLite database file, for example C:\Data\orders"
+                            HintText="Path to the .db file"
                             OwnerActivity="{Binding Path=ModelItem}"
                             Expression="{Binding Path=ModelItem.DatabasePath, Mode=TwoWay, Converter={StaticResource ArgumentToExpressionConverter}, ConverterParameter=In}" />
     <TextBlock Grid.Row="1" Grid.Column="0" Text="Password" Margin="0,5,8,5" VerticalAlignment="Center" />
     <sapv:ExpressionTextBox x:Name="PasswordBox" Grid.Row="1" Grid.Column="1" Margin="0,2"
-                            HintText="Password of an encrypted database"
+                            HintText="Password, if encrypted"
                             OwnerActivity="{Binding Path=ModelItem}"
                             Expression="{Binding Path=ModelItem.Password, Mode=TwoWay, Converter={StaticResource ArgumentToExpressionConverter}, ConverterParameter=In}" />
     <TextBlock Grid.Row="2" Grid.Column="0" Text="Connection" Margin="0,5,8,5" VerticalAlignment="Center" />
     <sapv:ExpressionTextBox x:Name="ConnectionBox" Grid.Row="2" Grid.Column="1" Margin="0,2"
-                            HintText="The open connection" UseLocationExpression="True"
+                            HintText="Connection variable" UseLocationExpression="True"
                             OwnerActivity="{Binding Path=ModelItem}"
                             Expression="{Binding Path=ModelItem.Connection, Mode=TwoWay, Converter={StaticResource ArgumentToExpressionConverter}, ConverterParameter=Out}" />
   </Grid>

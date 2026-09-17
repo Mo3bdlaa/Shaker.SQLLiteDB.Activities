@@ -21,8 +21,8 @@
   </sap:ActivityDesigner.Resources>
   <Grid Margin="4">
     <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="Auto" />
-      <ColumnDefinition Width="*" MinWidth="190" />
+      <ColumnDefinition Width="Auto" MinWidth="96" />
+      <ColumnDefinition Width="260" />
     </Grid.ColumnDefinitions>
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
@@ -33,27 +33,27 @@
     </Grid.RowDefinitions>
     <TextBlock Grid.Row="0" Grid.Column="0" Text="Connection" Margin="0,5,8,5" VerticalAlignment="Center" />
     <sapv:ExpressionTextBox x:Name="ConnectionBox" Grid.Row="0" Grid.Column="1" Margin="0,2"
-                            HintText="Connection"
+                            HintText="Connection variable"
                             OwnerActivity="{Binding Path=ModelItem}"
                             Expression="{Binding Path=ModelItem.Connection, Mode=TwoWay, Converter={StaticResource ArgumentToExpressionConverter}, ConverterParameter=In}" />
     <TextBlock Grid.Row="1" Grid.Column="0" Text="SQL" Margin="0,5,8,5" VerticalAlignment="Center" />
     <sapv:ExpressionTextBox x:Name="SqlBox" Grid.Row="1" Grid.Column="1" Margin="0,2"
-                            HintText="Query whose result is exported"
+                            HintText="SQL statement"
                             OwnerActivity="{Binding Path=ModelItem}"
                             Expression="{Binding Path=ModelItem.Sql, Mode=TwoWay, Converter={StaticResource ArgumentToExpressionConverter}, ConverterParameter=In}" />
     <TextBlock Grid.Row="2" Grid.Column="0" Text="Table to export" Margin="0,5,8,5" VerticalAlignment="Center" />
     <sapv:ExpressionTextBox x:Name="SourceTableNameBox" Grid.Row="2" Grid.Column="1" Margin="0,2"
-                            HintText="Name of a table to export completely"
+                            HintText="Or a table name"
                             OwnerActivity="{Binding Path=ModelItem}"
                             Expression="{Binding Path=ModelItem.SourceTableName, Mode=TwoWay, Converter={StaticResource ArgumentToExpressionConverter}, ConverterParameter=In}" />
     <TextBlock Grid.Row="3" Grid.Column="0" Text="File path" Margin="0,5,8,5" VerticalAlignment="Center" />
     <sapv:ExpressionTextBox x:Name="FilePathBox" Grid.Row="3" Grid.Column="1" Margin="0,2"
-                            HintText="Where the CSV file is written"
+                            HintText="File path"
                             OwnerActivity="{Binding Path=ModelItem}"
                             Expression="{Binding Path=ModelItem.FilePath, Mode=TwoWay, Converter={StaticResource ArgumentToExpressionConverter}, ConverterParameter=In}" />
     <TextBlock Grid.Row="4" Grid.Column="0" Text="Result" Margin="0,5,8,5" VerticalAlignment="Center" />
     <sapv:ExpressionTextBox x:Name="ResultBox" Grid.Row="4" Grid.Column="1" Margin="0,2"
-                            HintText="Result" UseLocationExpression="True"
+                            HintText="Variable for the result" UseLocationExpression="True"
                             OwnerActivity="{Binding Path=ModelItem}"
                             Expression="{Binding Path=ModelItem.Result, Mode=TwoWay, Converter={StaticResource ArgumentToExpressionConverter}, ConverterParameter=Out}" />
   </Grid>

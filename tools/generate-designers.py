@@ -43,6 +43,33 @@ PRINCIPAL = {
   'SQLiteExecuteBatch':     ['Connection', 'DatabasePath', 'Statements', 'Result'],
 }
 
+# Activities whose body is an ActivityAction: the designer has to host the drop area itself,
+# otherwise the scope renders as a plain box with nowhere to put the activities it wraps.
+SCOPES = {'SQLiteConnectScope', 'SQLiteTransactionScope', 'SQLiteWriteLockScope'}
+
+# Short, uniform placeholder text. A long hint widens the whole activity, which is what made
+# Connect twice the width of Connect Scope for no reason.
+HINTS = {
+  'DatabasePath':    'Path to the .db file',
+  'Password':        'Password, if encrypted',
+  'Sql':             'SQL statement',
+  'Script':          'SQL script text',
+  'ScriptFilePath':  'Or a path to a .sql file',
+  'TableName':       'Table name',
+  'DataTable':       'DataTable to write',
+  'FilePath':        'File path',
+  'SourceTableName': 'Or a table name',
+  'DestinationPath': 'Where to write the copy',
+  'NewPassword':     'New password',
+  'AttachPath':      'Second .db file',
+  'Alias':           'Name to use in SQL',
+  'Queries':         'Name to SQL dictionary',
+  'Statements':      'List of statements',
+  'Json':            'Variable for the JSON',
+  'Connection':      'Connection variable',
+  'Result':          'Variable for the result',
+}
+
 CONNECTION, READ, WRITE, EXPORT, ADMIN = '#2F6FEB', '#16A34A', '#EA580C', '#7C3AED', '#475569'
 
 # ---------------------------------------------------------------- icon drawing helpers
@@ -158,8 +185,7 @@ def escape(text):
                 .replace('"', '&quot;'))
 
 def hint_for(prop):
-    tip = prop['tooltip'].split('.')[0].strip()
-    return tip if 0 < len(tip) <= 70 else prop['display'] or prop['name']
+    return HINTS.get(prop['name'], prop['display'] or prop['name'])
 
 def generate(name):
     act = ACTS[name]
@@ -193,7 +219,18 @@ def generate(name):
                 '              IsChecked="{Binding Path=ModelItem.%s, Mode=TwoWay}" />'
                 % (index, escape(label), field))
 
-    row_defs = '\n'.join('      <RowDefinition Height="Auto" />' for _ in PRINCIPAL[name])
+    if name in SCOPES:
+        index = len(PRINCIPAL[name])
+        rows.append(
+            '    <Border Grid.Row="%d" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,8,0,0" Padding="2"\n'
+            '            BorderBrush="{x:Static SystemColors.ControlDarkBrush}" BorderThickness="1" CornerRadius="3">\n'
+            '      <sap:WorkflowItemPresenter Item="{Binding Path=ModelItem.Body.Handler, Mode=TwoWay}"\n'
+            '                                 HintText="Drop the activities that use this scope here"\n'
+            '                                 MinHeight="58" MinWidth="250" Margin="4" />\n'
+            '    </Border>' % index)
+
+    row_count = len(PRINCIPAL[name]) + (1 if name in SCOPES else 0)
+    row_defs = '\n'.join('      <RowDefinition Height="Auto" />' for _ in range(row_count))
     xaml = '''<sap:ActivityDesigner x:Class="Shaker.SQLLiteDB.Activities.Design.Designers.%(cls)s"
                       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -206,8 +243,8 @@ def generate(name):
   </sap:ActivityDesigner.Resources>
   <Grid Margin="4">
     <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="Auto" />
-      <ColumnDefinition Width="*" MinWidth="190" />
+      <ColumnDefinition Width="Auto" MinWidth="96" />
+      <ColumnDefinition Width="260" />
     </Grid.ColumnDefinitions>
     <Grid.RowDefinitions>
 %(rows_def)s

@@ -24,7 +24,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>package-icon.png</PackageIcon>
-    <PackageReleaseNotes>Adds WPF activity designers: every activity now has its own icon in the panel and draws its main inputs and outputs on the activity itself instead of hiding them in the Properties panel. Version 1.0.0 is the same library without the designers.</PackageReleaseNotes>
+    <PackageReleaseNotes>Fixes the three scope activities losing the area you drop activities into, and gives every activity the same width on the canvas instead of one per hint text length.</PackageReleaseNotes>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PackageOutputPath>$(ArtifactsDirectory)</PackageOutputPath>

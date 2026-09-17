@@ -21,8 +21,8 @@
   </sap:ActivityDesigner.Resources>
   <Grid Margin="4">
     <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="Auto" />
-      <ColumnDefinition Width="*" MinWidth="190" />
+      <ColumnDefinition Width="Auto" MinWidth="96" />
+      <ColumnDefinition Width="260" />
     </Grid.ColumnDefinitions>
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
@@ -32,22 +32,22 @@
     </Grid.RowDefinitions>
     <TextBlock Grid.Row="0" Grid.Column="0" Text="Connection" Margin="0,5,8,5" VerticalAlignment="Center" />
     <sapv:ExpressionTextBox x:Name="ConnectionBox" Grid.Row="0" Grid.Column="1" Margin="0,2"
-                            HintText="Connection"
+                            HintText="Connection variable"
                             OwnerActivity="{Binding Path=ModelItem}"
                             Expression="{Binding Path=ModelItem.Connection, Mode=TwoWay, Converter={StaticResource ArgumentToExpressionConverter}, ConverterParameter=In}" />
     <TextBlock Grid.Row="1" Grid.Column="0" Text="Database path" Margin="0,5,8,5" VerticalAlignment="Center" />
     <sapv:ExpressionTextBox x:Name="DatabasePathBox" Grid.Row="1" Grid.Column="1" Margin="0,2"
-                            HintText="Full path of the SQLite database file, for example C:\Data\orders"
+                            HintText="Path to the .db file"
                             OwnerActivity="{Binding Path=ModelItem}"
                             Expression="{Binding Path=ModelItem.DatabasePath, Mode=TwoWay, Converter={StaticResource ArgumentToExpressionConverter}, ConverterParameter=In}" />
     <TextBlock Grid.Row="2" Grid.Column="0" Text="Table name" Margin="0,5,8,5" VerticalAlignment="Center" />
     <sapv:ExpressionTextBox x:Name="TableNameBox" Grid.Row="2" Grid.Column="1" Margin="0,2"
-                            HintText="Table whose columns should be described"
+                            HintText="Table name"
                             OwnerActivity="{Binding Path=ModelItem}"
                             Expression="{Binding Path=ModelItem.TableName, Mode=TwoWay, Converter={StaticResource ArgumentToExpressionConverter}, ConverterParameter=In}" />
     <TextBlock Grid.Row="3" Grid.Column="0" Text="Result" Margin="0,5,8,5" VerticalAlignment="Center" />
     <sapv:ExpressionTextBox x:Name="ResultBox" Grid.Row="3" Grid.Column="1" Margin="0,2"
-                            HintText="Result" UseLocationExpression="True"
+                            HintText="Variable for the result" UseLocationExpression="True"
                             OwnerActivity="{Binding Path=ModelItem}"
                             Expression="{Binding Path=ModelItem.Result, Mode=TwoWay, Converter={StaticResource ArgumentToExpressionConverter}, ConverterParameter=Out}" />
   </Grid>

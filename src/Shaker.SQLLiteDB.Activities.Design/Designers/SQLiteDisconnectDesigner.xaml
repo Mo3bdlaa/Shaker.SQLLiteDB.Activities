@@ -21,15 +21,15 @@
   </sap:ActivityDesigner.Resources>
   <Grid Margin="4">
     <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="Auto" />
-      <ColumnDefinition Width="*" MinWidth="190" />
+      <ColumnDefinition Width="Auto" MinWidth="96" />
+      <ColumnDefinition Width="260" />
     </Grid.ColumnDefinitions>
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
     <TextBlock Grid.Row="0" Grid.Column="0" Text="Connection" Margin="0,5,8,5" VerticalAlignment="Center" />
     <sapv:ExpressionTextBox x:Name="ConnectionBox" Grid.Row="0" Grid.Column="1" Margin="0,2"
-                            HintText="The connection to close"
+                            HintText="Connection variable"
                             OwnerActivity="{Binding Path=ModelItem}"
                             Expression="{Binding Path=ModelItem.Connection, Mode=TwoWay, Converter={StaticResource ArgumentToExpressionConverter}, ConverterParameter=In}" />
   </Grid>

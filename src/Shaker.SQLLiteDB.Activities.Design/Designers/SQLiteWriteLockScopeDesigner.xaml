@@ -20,22 +20,29 @@
   </sap:ActivityDesigner.Resources>
   <Grid Margin="4">
     <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="Auto" />
-      <ColumnDefinition Width="*" MinWidth="190" />
+      <ColumnDefinition Width="Auto" MinWidth="96" />
+      <ColumnDefinition Width="260" />
     </Grid.ColumnDefinitions>
     <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
     <TextBlock Grid.Row="0" Grid.Column="0" Text="Connection" Margin="0,5,8,5" VerticalAlignment="Center" />
     <sapv:ExpressionTextBox x:Name="ConnectionBox" Grid.Row="0" Grid.Column="1" Margin="0,2"
-                            HintText="Connection whose database should be locked"
+                            HintText="Connection variable"
                             OwnerActivity="{Binding Path=ModelItem}"
                             Expression="{Binding Path=ModelItem.Connection, Mode=TwoWay, Converter={StaticResource ArgumentToExpressionConverter}, ConverterParameter=In}" />
     <TextBlock Grid.Row="1" Grid.Column="0" Text="Database path" Margin="0,5,8,5" VerticalAlignment="Center" />
     <sapv:ExpressionTextBox x:Name="DatabasePathBox" Grid.Row="1" Grid.Column="1" Margin="0,2"
-                            HintText="Database to lock, when the scope is used without a connection"
+                            HintText="Path to the .db file"
                             OwnerActivity="{Binding Path=ModelItem}"
                             Expression="{Binding Path=ModelItem.DatabasePath, Mode=TwoWay, Converter={StaticResource ArgumentToExpressionConverter}, ConverterParameter=In}" />
+    <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,8,0,0" Padding="2"
+            BorderBrush="{x:Static SystemColors.ControlDarkBrush}" BorderThickness="1" CornerRadius="3">
+      <sap:WorkflowItemPresenter Item="{Binding Path=ModelItem.Body.Handler, Mode=TwoWay}"
+                                 HintText="Drop the activities that use this scope here"
+                                 MinHeight="58" MinWidth="250" Margin="4" />
+    </Border>
   </Grid>
 </sap:ActivityDesigner>

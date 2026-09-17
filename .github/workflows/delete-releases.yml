@@ -1,0 +1,43 @@
+name: delete releases
+
+# Removes releases and their tags. Run it from the Actions tab with a space separated
+# list of tags, for example:
+#     v1.0.1 v1.0.2 v1.0.3
+#
+# Tags that do not exist are skipped, so re-running it is harmless.
+on:
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: 'Space separated tags to delete, for example "v1.0.1 v1.0.2".'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  delete:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Delete the releases and their tags
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAGS: ${{ github.event.inputs.tags }}
+        run: |
+          for tag in $TAGS; do
+            if gh release view "$tag" >/dev/null 2>&1; then
+              gh release delete "$tag" --yes --cleanup-tag
+              echo "deleted release $tag"
+            elif git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null 2>&1; then
+              git push --delete origin "$tag"
+              echo "deleted tag $tag (it had no release)"
+            else
+              echo "nothing to delete for $tag"
+            fi
+          done
+          echo
+          echo "what is left:"
+          gh release list --limit 50

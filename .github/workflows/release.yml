@@ -125,35 +125,53 @@ jobs:
         shell: bash
         run: |
           cat > notes.md <<'NOTES'
-          UiPath activity library for SQLite. The SQLite engine ships inside the package
-          (SQLitePCLRaw, SQLCipher build), so a robot needs no ODBC driver, no
-          System.Data.SQLite install and no machine level configuration, and encrypted
-          databases work out of the box.
+          A UiPath activity library for SQLite that needs no ODBC driver, no
+          System.Data.SQLite install and no machine level configuration. The SQLite engine
+          itself ships inside the package - SQLitePCLRaw's SQLCipher build - so publishing
+          the library is all a robot needs, and AES-256 encrypted databases work out of the
+          box.
 
           **Installing in Studio**
 
           1. Download `Shaker.SQLLiteDB.Activities.VERSION_PLACEHOLDER.nupkg` below into a local folder.
           2. Studio: Manage Packages -> Settings -> add that folder as a package source.
-          3. Install **Shaker.SQLLiteDB.Activities**. The activities show up under Shaker -> SQLite.
+          3. Install **Shaker.SQLLiteDB.Activities**.
 
-          Works in both **Windows - Legacy** (`net461`) and **Windows** (`net6.0`) projects.
+          Studio 2022.10 or newer, in both **Windows** and **Windows - Legacy** projects. Keep
+          the UiPath Official feed enabled; one design time dependency restores from it.
+
+          If the Activities panel looks empty, turn on the funnel icon's **Show Classic** and
+          reopen the project.
 
           **What is in it**
 
-          * Many readers at once (WAL) plus `SQLite Parallel Query`.
-          * One writer at a time, serialized through a lock file that works across
-            processes and machines, with retries for the busy/locked errors.
-          * Connect, transaction and write lock scopes; query, scalar, non query, script
-            and batch; bulk insert with ignore/replace/upsert.
-          * Export to CSV, XLSX and JSON, and CSV import. The .xlsx writer is built into
-            the package, so no Open XML library is pulled into your project.
+          * 24 activities, each with its own icon, drawing the fields you fill in on the
+            activity itself rather than hiding them in the Properties panel.
+          * Many readers at once through WAL, plus `SQLite Parallel Query`.
+          * One writer at a time, serialized through a lock file that works across processes
+            and machines, with retries for the busy/locked errors.
+          * Connect and Disconnect, transaction and write lock scopes, query, scalar, non
+            query, script and statement lists.
+          * Insert a whole DataTable with ignore, replace or upsert.
+          * Export to CSV, XLSX and JSON, and CSV import. The .xlsx writer is built into the
+            package, so no Open XML library is pulled into your project.
           * Schema inspection, create table, maintenance, online backup, attach.
           * AES-256 encryption: set `Password`, or use `SQLite Set Password` to encrypt,
             re-key or decrypt a database.
 
+          The full property reference is in
+          [docs/activities.md](https://github.com/Mo3bdlaa/Shaker.SQLLiteDB.Activities/blob/HEAD/docs/activities.md).
+
           Verify the download against `SHA256SUMS.txt`.
           NOTES
           sed -i "s/VERSION_PLACEHOLDER/${VERSION}/g" notes.md
+
+          # Publishing a tag that is already out there replaces it, rather than failing half
+          # way through. Re-running the workflow for a version is then the obvious thing.
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "replacing the existing $TAG release"
+            gh release delete "$TAG" --yes --cleanup-tag
+          fi
 
           # --target creates the tag from this commit when it does not exist yet, so the
           # release can also be published straight from the Actions tab.

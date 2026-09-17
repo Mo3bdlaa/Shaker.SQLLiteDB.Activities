@@ -18,6 +18,8 @@ namespace Shaker.SQLLiteDB.Activities.Design
 
         public DesignInArgument<string> Password { get; set; } = new DesignInArgument<string>();
 
+        public DesignInArgument<string> LockFilePath { get; set; } = new DesignInArgument<string>();
+
         public DesignOutArgument<Shaker.SQLLiteDB.Activities.Core.SQLiteConnectionHandle> Connection { get; set; } = new DesignOutArgument<Shaker.SQLLiteDB.Activities.Core.SQLiteConnectionHandle>();
 
         public DesignInArgument<string> ConnectionString { get; set; } = new DesignInArgument<string>();
@@ -41,8 +43,6 @@ namespace Shaker.SQLLiteDB.Activities.Design
         public DesignInArgument<int> RetryInitialDelayMilliseconds { get; set; } = new DesignInArgument<int>();
 
         public DesignProperty<Shaker.SQLLiteDB.Activities.Core.SQLiteLockScope> LockScope { get; set; } = new DesignProperty<Shaker.SQLLiteDB.Activities.Core.SQLiteLockScope>();
-
-        public DesignInArgument<string> LockFilePath { get; set; } = new DesignInArgument<string>();
 
         public DesignInArgument<int> LockTimeoutMilliseconds { get; set; } = new DesignInArgument<int>();
 
@@ -71,6 +71,13 @@ namespace Shaker.SQLLiteDB.Activities.Design
             Password.OrderIndex = order++;
             Password.Widget = new DefaultWidget { Type = "Input" };
 
+            LockFilePath.DisplayName = "Lock file path";
+            LockFilePath.Tooltip = "Lock file that serializes writers. Empty uses '<database file>.writelock'.";
+            LockFilePath.Category = "Locking";
+            LockFilePath.IsPrincipal = true;
+            LockFilePath.OrderIndex = order++;
+            LockFilePath.Widget = new DefaultWidget { Type = "Input" };
+
             Connection.DisplayName = "Connection";
             Connection.Tooltip = "The connection that was opened, in case you want to hand it to activities outside the scope.";
             Connection.Category = "Output";
@@ -81,12 +88,14 @@ namespace Shaker.SQLLiteDB.Activities.Design
             ConnectionString.DisplayName = "Connection string";
             ConnectionString.Tooltip = "Complete connection string. Wins over 'Database path'.";
             ConnectionString.Category = "Connection";
+            ConnectionString.IsVisible = false;
             ConnectionString.OrderIndex = order++;
             ConnectionString.Widget = new DefaultWidget { Type = "Input" };
 
             OpenMode.DisplayName = "Open mode";
             OpenMode.Tooltip = "ReadWriteCreate creates the database when missing, ReadOnly never takes the writer lock, Memory keeps everything in RAM.";
             OpenMode.Category = "Connection";
+            OpenMode.IsVisible = false;
             OpenMode.OrderIndex = order++;
             OpenMode.Widget = new DefaultWidget { Type = "Dropdown" };
             OpenMode.DataSource = EnumDataSourceBuilder<Shaker.SQLLiteDB.Activities.Core.SQLiteOpenMode>.Build(DataSourceEnumOrder.OrderById, value => value.ToString());
@@ -94,6 +103,7 @@ namespace Shaker.SQLLiteDB.Activities.Design
             JournalMode.DisplayName = "Journal mode";
             JournalMode.Tooltip = "WAL lets many readers work while one writer is active. Recommended.";
             JournalMode.Category = "Connection";
+            JournalMode.IsVisible = false;
             JournalMode.OrderIndex = order++;
             JournalMode.Widget = new DefaultWidget { Type = "Dropdown" };
             JournalMode.DataSource = EnumDataSourceBuilder<Shaker.SQLLiteDB.Activities.Core.SQLiteJournalMode>.Build(DataSourceEnumOrder.OrderById, value => value.ToString());
@@ -101,6 +111,7 @@ namespace Shaker.SQLLiteDB.Activities.Design
             Synchronous.DisplayName = "Synchronous";
             Synchronous.Tooltip = "Durability level. Normal is safe and fast together with WAL.";
             Synchronous.Category = "Connection";
+            Synchronous.IsVisible = false;
             Synchronous.OrderIndex = order++;
             Synchronous.Widget = new DefaultWidget { Type = "Dropdown" };
             Synchronous.DataSource = EnumDataSourceBuilder<Shaker.SQLLiteDB.Activities.Core.SQLiteSynchronousMode>.Build(DataSourceEnumOrder.OrderById, value => value.ToString());
@@ -108,73 +119,78 @@ namespace Shaker.SQLLiteDB.Activities.Design
             EnforceForeignKeys.DisplayName = "Enforce foreign keys";
             EnforceForeignKeys.Tooltip = "Turn foreign key constraints on. SQLite has them off by default.";
             EnforceForeignKeys.Category = "Connection";
+            EnforceForeignKeys.IsVisible = false;
             EnforceForeignKeys.OrderIndex = order++;
             EnforceForeignKeys.Widget = new DefaultWidget { Type = "Checkbox" };
 
             BusyTimeoutMilliseconds.DisplayName = "Busy timeout (ms)";
             BusyTimeoutMilliseconds.Tooltip = "How long SQLite waits for a lock held by another connection before it reports 'database is locked'.";
             BusyTimeoutMilliseconds.Category = "Connection";
+            BusyTimeoutMilliseconds.IsVisible = false;
             BusyTimeoutMilliseconds.OrderIndex = order++;
             BusyTimeoutMilliseconds.Widget = new DefaultWidget { Type = "Input" };
 
             CommandTimeoutSeconds.DisplayName = "Command timeout (s)";
             CommandTimeoutSeconds.Tooltip = "Default command timeout in seconds for the activities inside the scope.";
             CommandTimeoutSeconds.Category = "Connection";
+            CommandTimeoutSeconds.IsVisible = false;
             CommandTimeoutSeconds.OrderIndex = order++;
             CommandTimeoutSeconds.Widget = new DefaultWidget { Type = "Input" };
 
             CacheSizeKilobytes.DisplayName = "Cache size (KB)";
             CacheSizeKilobytes.Tooltip = "Page cache size in kilobytes. 0 keeps the engine default.";
             CacheSizeKilobytes.Category = "Connection";
+            CacheSizeKilobytes.IsVisible = false;
             CacheSizeKilobytes.OrderIndex = order++;
             CacheSizeKilobytes.Widget = new DefaultWidget { Type = "Input" };
 
             RetryAttempts.DisplayName = "Retry attempts";
             RetryAttempts.Tooltip = "How often a statement is retried while SQLite reports 'database is locked'. 1 disables retrying.";
             RetryAttempts.Category = "Retry";
+            RetryAttempts.IsVisible = false;
             RetryAttempts.OrderIndex = order++;
             RetryAttempts.Widget = new DefaultWidget { Type = "Input" };
 
             RetryInitialDelayMilliseconds.DisplayName = "Retry initial delay (ms)";
             RetryInitialDelayMilliseconds.Tooltip = "Delay before the first retry. It doubles after every failed attempt.";
             RetryInitialDelayMilliseconds.Category = "Retry";
+            RetryInitialDelayMilliseconds.IsVisible = false;
             RetryInitialDelayMilliseconds.OrderIndex = order++;
             RetryInitialDelayMilliseconds.Widget = new DefaultWidget { Type = "Input" };
 
             LockScope.DisplayName = "Lock scope";
             LockScope.Tooltip = "Machine: a lock file serializes writers across processes and machines (default). Process: only inside this robot. None: rely on SQLite alone.";
             LockScope.Category = "Locking";
+            LockScope.IsVisible = false;
             LockScope.OrderIndex = order++;
             LockScope.Widget = new DefaultWidget { Type = "Dropdown" };
             LockScope.DataSource = EnumDataSourceBuilder<Shaker.SQLLiteDB.Activities.Core.SQLiteLockScope>.Build(DataSourceEnumOrder.OrderById, value => value.ToString());
 
-            LockFilePath.DisplayName = "Lock file path";
-            LockFilePath.Tooltip = "Lock file that serializes writers. Empty uses '<database file>.writelock'.";
-            LockFilePath.Category = "Locking";
-            LockFilePath.OrderIndex = order++;
-            LockFilePath.Widget = new DefaultWidget { Type = "Input" };
-
             LockTimeoutMilliseconds.DisplayName = "Lock timeout (ms)";
             LockTimeoutMilliseconds.Tooltip = "How long a write activity waits for the writer lock before it fails.";
             LockTimeoutMilliseconds.Category = "Locking";
+            LockTimeoutMilliseconds.IsVisible = false;
             LockTimeoutMilliseconds.OrderIndex = order++;
             LockTimeoutMilliseconds.Widget = new DefaultWidget { Type = "Input" };
 
             LockReads.DisplayName = "Lock reads as well";
             LockReads.Tooltip = "Also take the lock for read activities. Only needed for non-WAL databases on a file share.";
             LockReads.Category = "Locking";
+            LockReads.IsVisible = false;
             LockReads.OrderIndex = order++;
             LockReads.Widget = new DefaultWidget { Type = "Checkbox" };
 
             SQLiteVersion.DisplayName = "SQLite version";
             SQLiteVersion.Tooltip = "Version of the embedded SQLite engine, for example 3.45.1.";
             SQLiteVersion.Category = "Output";
+            SQLiteVersion.IsVisible = false;
             SQLiteVersion.OrderIndex = order++;
             SQLiteVersion.Widget = new DefaultWidget { Type = "Input" };
 
             CipherVersion.DisplayName = "Cipher version";
             CipherVersion.Tooltip = "Version of the SQLCipher layer, for example '4.5.2 community'. Empty when the loaded engine cannot do encryption.";
             CipherVersion.Category = "Output";
+            CipherVersion.IsVisible = false;
             CipherVersion.OrderIndex = order++;
             CipherVersion.Widget = new DefaultWidget { Type = "Input" };
         }

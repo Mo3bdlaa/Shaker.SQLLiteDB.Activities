@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.Data.Sqlite;
 
@@ -25,19 +28,116 @@ namespace Shaker.SQLLiteDB.Activities.Core
                 return;
             }
 
+            var probed = new List<string>();
             try
             {
+                PreloadWindowsEngine(probed);
                 SQLitePCL.Batteries_V2.Init();
             }
             catch (Exception ex)
             {
                 Interlocked.Exchange(ref _initialized, 0);
                 throw new SQLiteActivityException(
-                    "The embedded SQLite engine (e_sqlcipher) could not be loaded. Make sure the native files that ship " +
-                    "with this package were copied next to the executing assembly (runtimes\\win-x64\\native\\e_sqlcipher.dll " +
-                    "or x86\\x64 sub folders for Windows - Legacy projects).", ex);
+                    "The embedded SQLite engine (e_sqlcipher) could not be loaded." +
+                    (probed.Count == 0 ? string.Empty : " Looked for it in: " + string.Join("; ", probed.ToArray()) + "."),
+                    ex);
             }
         }
+
+        /// <summary>
+        /// Loads the native engine that ships in this package by full path, before the provider's own
+        /// DllImport gets a chance to fail.
+        /// <para>
+        /// A robot does not run the workflow from a build output folder: the activity assembly is loaded
+        /// straight out of the extracted package, and .NET's plain <c>DllImport("e_sqlcipher")</c> does
+        /// not search there. Loading the file by full path first puts the module in the process under the
+        /// name the provider asks for, so its DllImport then resolves to it. Every layout the package can
+        /// end up in is tried, which is why the list is this long.
+        /// </para>
+        /// </summary>
+        private static void PreloadWindowsEngine(List<string> probed)
+        {
+            if (Environment.OSVersion.Platform != PlatformID.Win32NT)
+            {
+                // Linux and macOS: the provider finds its own native through the runtimes folder that
+                // NuGet lays out, which is how the test suite runs.
+                return;
+            }
+
+            var architecture = IntPtr.Size == 8 ? "x64" : "x86";
+            var relative = new[]
+            {
+                "e_sqlcipher.dll",
+                Path.Combine(architecture, "e_sqlcipher.dll"),
+                Path.Combine("runtimes", "win-" + architecture, "native", "e_sqlcipher.dll"),
+                Path.Combine("..", "..", "runtimes", "win-" + architecture, "native", "e_sqlcipher.dll"),
+                Path.Combine("..", "..", "..", "runtimes", "win-" + architecture, "native", "e_sqlcipher.dll"),
+            };
+
+            foreach (var root in ProbeRoots())
+            {
+                foreach (var tail in relative)
+                {
+                    string candidate;
+                    try
+                    {
+                        candidate = Path.GetFullPath(Path.Combine(root, tail));
+                    }
+                    catch (Exception)
+                    {
+                        continue;
+                    }
+
+                    if (probed.Contains(candidate))
+                    {
+                        continue;
+                    }
+
+                    probed.Add(candidate);
+                    if (File.Exists(candidate) && LoadLibrary(candidate) != IntPtr.Zero)
+                    {
+                        return;
+                    }
+                }
+            }
+        }
+
+        private static IEnumerable<string> ProbeRoots()
+        {
+            var roots = new List<string>();
+
+            try
+            {
+                var location = typeof(SQLiteNative).Assembly.Location;
+                if (!string.IsNullOrEmpty(location))
+                {
+                    roots.Add(Path.GetDirectoryName(location));
+                }
+            }
+            catch (Exception)
+            {
+                // A dynamic or single file assembly has no location. The base directory below still applies.
+            }
+
+            try
+            {
+                roots.Add(AppDomain.CurrentDomain.BaseDirectory);
+            }
+            catch (Exception)
+            {
+            }
+
+            foreach (var root in roots)
+            {
+                if (!string.IsNullOrEmpty(root))
+                {
+                    yield return root;
+                }
+            }
+        }
+
+        [DllImport("kernel32", CharSet = CharSet.Unicode, SetLastError = true)]
+        private static extern IntPtr LoadLibrary(string path);
 
         /// <summary>Version string of the loaded SQLite engine, for example <c>3.45.1</c>.</summary>
         public static string EngineVersion

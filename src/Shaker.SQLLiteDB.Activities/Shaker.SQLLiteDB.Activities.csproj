@@ -20,7 +20,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>package-icon.png</PackageIcon>
-    <PackageReleaseNotes>Every activity now draws its main fields inside the activity itself - connection, SQL, table, file, result - instead of hiding everything in the Properties panel, the way the UiPath Database activities do. Needs the UiPath Official package feed enabled, for System.Activities.ViewModels. Version 1.2.0 is the same library without the designers.</PackageReleaseNotes>
+    <PackageReleaseNotes>Fixes the native SQLite engine failing to load on a robot: it now ships in the runtimes/win-x64/native layout NuGet actually restores, and is loaded by full path at startup. The activity body now shows only the fields you fill in - everything else moved to the Properties panel. Needs the UiPath Official package feed enabled, for System.Activities.ViewModels. Version 1.2.0 is the same library without the designers.</PackageReleaseNotes>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PackageOutputPath>$(ArtifactsDirectory)</PackageOutputPath>
@@ -115,12 +115,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- The native SQLCipher engine for Windows. x64 sits next to the assemblies, where both loaders
-         look first; the x86 and x64 sub folders cover the .NET Framework loader's own convention. -->
+    <!-- The native SQLCipher engine for Windows, in every layout a host might look in.
+         runtimes/win-<arch>/native is the one NuGet itself understands and the only place a normal
+         restore will copy from - a plain .dll inside lib/ is not a managed assembly, so NuGet skips
+         it, which is why a robot could install this package and still fail to load the engine.
+         The lib/ copies remain for the .NET Framework loader and for hosts that just extract the
+         package; SQLiteNative.PreloadWindowsEngine walks all of these by full path at startup. -->
     <None Include="$(ESqlCipherNative)/win-x64/native/e_sqlcipher.dll"
-          Pack="true" PackagePath="lib/net461/;lib/net461/x64/;lib/net6.0/;lib/net6.0/x64/" Visible="false" />
+          Pack="true" PackagePath="runtimes/win-x64/native/;lib/net461/;lib/net461/x64/;lib/net6.0/;lib/net6.0/x64/" Visible="false" />
     <None Include="$(ESqlCipherNative)/win-x86/native/e_sqlcipher.dll"
-          Pack="true" PackagePath="lib/net461/x86/;lib/net6.0/x86/" Visible="false" />
+          Pack="true" PackagePath="runtimes/win-x86/native/;lib/net461/x86/;lib/net6.0/x86/" Visible="false" />
   </ItemGroup>
 
 </Project>

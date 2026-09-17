@@ -20,12 +20,15 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ACTS = json.load(open(os.environ.get('ACTS_JSON', 'acts.json')))
 OUT = os.path.join(ROOT, 'src', 'Shaker.SQLLiteDB.Activities', 'Design')
 
-# Ordered list of the fields drawn inside the activity body, per activity.
+# Ordered list of the fields drawn inside the activity body, per activity. Everything else the
+# activity has is still declared on the view model - leaving a property out hides it from the
+# designer altogether - but gets IsVisible = false, so it stays in the Properties panel instead of
+# crowding the activity.
 PRINCIPAL = {
-  'SQLiteConnect':          ['DatabasePath', 'Password', 'Connection'],
+  'SQLiteConnect':          ['DatabasePath', 'Password', 'LockFilePath', 'Connection'],
   'SQLiteDisconnect':       ['Connection', 'Result'],
   'SQLiteTransactionScope': ['Connection', 'TransactionMode'],
-  'SQLiteConnectScope':     ['DatabasePath', 'Password', 'Connection'],
+  'SQLiteConnectScope':     ['DatabasePath', 'Password', 'LockFilePath', 'Connection'],
   'SQLiteWriteLockScope':   ['Connection', 'DatabasePath'],
   'SQLiteExecuteQuery':     ['Connection', 'DatabasePath', 'Sql', 'Parameters', 'Result'],
   'SQLiteExecuteScalar':    ['Connection', 'DatabasePath', 'Sql', 'Parameters', 'Result'],
@@ -133,6 +136,8 @@ for act in ACTS:
         lines.append('%s.Category = %s;' % (n, cs(cat)))
         if n in principal:
             lines.append('%s.IsPrincipal = true;' % n)
+        else:
+            lines.append('%s.IsVisible = false;' % n)
         if p['required']:
             lines.append('%s.IsRequired = true;' % n)
         lines.append('%s.OrderIndex = order++;' % n)

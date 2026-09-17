@@ -112,24 +112,28 @@ namespace Shaker.SQLLiteDB.Activities.Design
             Parameters.DisplayName = "Parameters";
             Parameters.Tooltip = "Named parameters of the query, as a Dictionary(Of String, Object).";
             Parameters.Category = "Input";
+            Parameters.IsVisible = false;
             Parameters.OrderIndex = order++;
             Parameters.Widget = new DefaultWidget { Type = "Input" };
 
             DataTable.DisplayName = "Data table";
             DataTable.Tooltip = "Rows to export. When this is supplied, no query is run and no connection is needed.";
             DataTable.Category = "Input";
+            DataTable.IsVisible = false;
             DataTable.OrderIndex = order++;
             DataTable.Widget = new DefaultWidget { Type = "Input" };
 
             ConnectionString.DisplayName = "Connection string";
             ConnectionString.Tooltip = "Complete connection string, for example \"Data Source=C:\\Data\\orders.db;Mode=ReadWriteCreate\". Wins over 'Database path'.";
             ConnectionString.Category = "Connection";
+            ConnectionString.IsVisible = false;
             ConnectionString.OrderIndex = order++;
             ConnectionString.Widget = new DefaultWidget { Type = "Input" };
 
             OpenMode.DisplayName = "Open mode";
             OpenMode.Tooltip = "How the database file is opened when this activity opens its own connection.";
             OpenMode.Category = "Connection";
+            OpenMode.IsVisible = false;
             OpenMode.OrderIndex = order++;
             OpenMode.Widget = new DefaultWidget { Type = "Dropdown" };
             OpenMode.DataSource = EnumDataSourceBuilder<Shaker.SQLLiteDB.Activities.Core.SQLiteOpenMode>.Build(DataSourceEnumOrder.OrderById, value => value.ToString());
@@ -137,6 +141,7 @@ namespace Shaker.SQLLiteDB.Activities.Design
             JournalMode.DisplayName = "Journal mode";
             JournalMode.Tooltip = "WAL lets many readers work while one writer is active. This is what makes concurrent reads possible and is the recommended setting.";
             JournalMode.Category = "Connection";
+            JournalMode.IsVisible = false;
             JournalMode.OrderIndex = order++;
             JournalMode.Widget = new DefaultWidget { Type = "Dropdown" };
             JournalMode.DataSource = EnumDataSourceBuilder<Shaker.SQLLiteDB.Activities.Core.SQLiteJournalMode>.Build(DataSourceEnumOrder.OrderById, value => value.ToString());
@@ -144,36 +149,42 @@ namespace Shaker.SQLLiteDB.Activities.Design
             BusyTimeoutMilliseconds.DisplayName = "Busy timeout (ms)";
             BusyTimeoutMilliseconds.Tooltip = "How long SQLite waits for a lock held by another connection before it reports 'database is locked'.";
             BusyTimeoutMilliseconds.Category = "Connection";
+            BusyTimeoutMilliseconds.IsVisible = false;
             BusyTimeoutMilliseconds.OrderIndex = order++;
             BusyTimeoutMilliseconds.Widget = new DefaultWidget { Type = "Input" };
 
             Password.DisplayName = "Password";
             Password.Tooltip = "Password of an encrypted database. Leave it empty for a normal database. Use the SQLite Set Password activity to encrypt an existing database or to change its password.";
             Password.Category = "Connection";
+            Password.IsVisible = false;
             Password.OrderIndex = order++;
             Password.Widget = new DefaultWidget { Type = "Input" };
 
             Indented.DisplayName = "Indented";
             Indented.Tooltip = "Write the JSON with line breaks and indentation.";
             Indented.Category = "Output file";
+            Indented.IsVisible = false;
             Indented.OrderIndex = order++;
             Indented.Widget = new DefaultWidget { Type = "Checkbox" };
 
             Encoding.DisplayName = "Encoding";
             Encoding.Tooltip = "Encoding name, for example utf-8 (default).";
             Encoding.Category = "Output file";
+            Encoding.IsVisible = false;
             Encoding.OrderIndex = order++;
             Encoding.Widget = new DefaultWidget { Type = "Input" };
 
             DateTimeFormat.DisplayName = "Date format";
             DateTimeFormat.Tooltip = "Format applied to date and time values. Default is the round trippable ISO 8601 format.";
             DateTimeFormat.Category = "Output file";
+            DateTimeFormat.IsVisible = false;
             DateTimeFormat.OrderIndex = order++;
             DateTimeFormat.Widget = new DefaultWidget { Type = "Input" };
 
             LockScope.DisplayName = "Lock scope";
             LockScope.Tooltip = "Machine: a lock file serializes writers across processes and machines (default). Process: only inside this robot. None: rely on SQLite alone.";
             LockScope.Category = "Locking";
+            LockScope.IsVisible = false;
             LockScope.OrderIndex = order++;
             LockScope.Widget = new DefaultWidget { Type = "Dropdown" };
             LockScope.DataSource = EnumDataSourceBuilder<Shaker.SQLLiteDB.Activities.Core.SQLiteLockScope>.Build(DataSourceEnumOrder.OrderById, value => value.ToString());
@@ -181,42 +192,49 @@ namespace Shaker.SQLLiteDB.Activities.Design
             LockFilePath.DisplayName = "Lock file path";
             LockFilePath.Tooltip = "Lock file that serializes writers. Empty uses '<database file>.writelock'. Point several robots at the same file to serialize them.";
             LockFilePath.Category = "Locking";
+            LockFilePath.IsVisible = false;
             LockFilePath.OrderIndex = order++;
             LockFilePath.Widget = new DefaultWidget { Type = "Input" };
 
             LockTimeoutMilliseconds.DisplayName = "Lock timeout (ms)";
             LockTimeoutMilliseconds.Tooltip = "How long this activity waits for the writer lock before it fails.";
             LockTimeoutMilliseconds.Category = "Locking";
+            LockTimeoutMilliseconds.IsVisible = false;
             LockTimeoutMilliseconds.OrderIndex = order++;
             LockTimeoutMilliseconds.Widget = new DefaultWidget { Type = "Input" };
 
             TimeoutMS.DisplayName = "TimeoutMS";
             TimeoutMS.Tooltip = "Maximum run time of this activity in milliseconds. Use 0 for no limit.";
             TimeoutMS.Category = "Common";
+            TimeoutMS.IsVisible = false;
             TimeoutMS.OrderIndex = order++;
             TimeoutMS.Widget = new DefaultWidget { Type = "Input" };
 
             ContinueOnError.DisplayName = "ContinueOnError";
             ContinueOnError.Tooltip = "When true the workflow carries on even if this activity throws. The error is reported in 'ErrorMessage'.";
             ContinueOnError.Category = "Common";
+            ContinueOnError.IsVisible = false;
             ContinueOnError.OrderIndex = order++;
             ContinueOnError.Widget = new DefaultWidget { Type = "NullableBoolean" };
 
             RowsExported.DisplayName = "Rows exported";
             RowsExported.Tooltip = "Number of rows written.";
             RowsExported.Category = "Output";
+            RowsExported.IsVisible = false;
             RowsExported.OrderIndex = order++;
             RowsExported.Widget = new DefaultWidget { Type = "Input" };
 
             Json.DisplayName = "JSON";
             Json.Tooltip = "The JSON text. Also filled in when the result was written to a file, unless the result is very large.";
             Json.Category = "Output";
+            Json.IsVisible = false;
             Json.OrderIndex = order++;
             Json.Widget = new DefaultWidget { Type = "Input" };
 
             ErrorMessage.DisplayName = "Error message";
             ErrorMessage.Tooltip = "Message of the error that was swallowed because ContinueOnError is true. Empty when the activity succeeded.";
             ErrorMessage.Category = "Output";
+            ErrorMessage.IsVisible = false;
             ErrorMessage.OrderIndex = order++;
             ErrorMessage.Widget = new DefaultWidget { Type = "Input" };
         }

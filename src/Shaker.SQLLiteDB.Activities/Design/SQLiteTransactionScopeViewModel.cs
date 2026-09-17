@@ -47,18 +47,21 @@ namespace Shaker.SQLLiteDB.Activities.Design
             TakeWriteLock.DisplayName = "Take writer lock";
             TakeWriteLock.Tooltip = "Hold the writer lock for the whole transaction so that other processes queue up instead of failing with 'database is locked'.";
             TakeWriteLock.Category = "Transaction";
+            TakeWriteLock.IsVisible = false;
             TakeWriteLock.OrderIndex = order++;
             TakeWriteLock.Widget = new DefaultWidget { Type = "Checkbox" };
 
             LockTimeoutMilliseconds.DisplayName = "Lock timeout (ms)";
             LockTimeoutMilliseconds.Tooltip = "How long the scope waits for the writer lock before it fails.";
             LockTimeoutMilliseconds.Category = "Transaction";
+            LockTimeoutMilliseconds.IsVisible = false;
             LockTimeoutMilliseconds.OrderIndex = order++;
             LockTimeoutMilliseconds.Widget = new DefaultWidget { Type = "Input" };
 
             Committed.DisplayName = "Committed";
             Committed.Tooltip = "True when the transaction was committed, false when it was rolled back.";
             Committed.Category = "Output";
+            Committed.IsVisible = false;
             Committed.OrderIndex = order++;
             Committed.Widget = new DefaultWidget { Type = "Checkbox" };
         }

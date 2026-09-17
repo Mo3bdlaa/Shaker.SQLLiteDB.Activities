@@ -48,6 +48,7 @@ namespace Shaker.SQLLiteDB.Activities.Design
             LockScope.DisplayName = "Lock scope";
             LockScope.Tooltip = "Machine: a lock file serializes writers across processes and machines. Process: only inside this robot.";
             LockScope.Category = "Locking";
+            LockScope.IsVisible = false;
             LockScope.OrderIndex = order++;
             LockScope.Widget = new DefaultWidget { Type = "Dropdown" };
             LockScope.DataSource = EnumDataSourceBuilder<Shaker.SQLLiteDB.Activities.Core.SQLiteLockScope>.Build(DataSourceEnumOrder.OrderById, value => value.ToString());
@@ -55,18 +56,21 @@ namespace Shaker.SQLLiteDB.Activities.Design
             LockFilePath.DisplayName = "Lock file path";
             LockFilePath.Tooltip = "Lock file to use. Empty uses '<database file>.writelock'.";
             LockFilePath.Category = "Locking";
+            LockFilePath.IsVisible = false;
             LockFilePath.OrderIndex = order++;
             LockFilePath.Widget = new DefaultWidget { Type = "Input" };
 
             LockTimeoutMilliseconds.DisplayName = "Lock timeout (ms)";
             LockTimeoutMilliseconds.Tooltip = "How long the scope waits for the lock before it fails.";
             LockTimeoutMilliseconds.Category = "Locking";
+            LockTimeoutMilliseconds.IsVisible = false;
             LockTimeoutMilliseconds.OrderIndex = order++;
             LockTimeoutMilliseconds.Widget = new DefaultWidget { Type = "Input" };
 
             WaitedMilliseconds.DisplayName = "Waited (ms)";
             WaitedMilliseconds.Tooltip = "How long this scope had to wait before it got the lock.";
             WaitedMilliseconds.Category = "Output";
+            WaitedMilliseconds.IsVisible = false;
             WaitedMilliseconds.OrderIndex = order++;
             WaitedMilliseconds.Widget = new DefaultWidget { Type = "Input" };
         }

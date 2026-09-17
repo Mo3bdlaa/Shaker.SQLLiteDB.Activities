@@ -7,85 +7,86 @@ encrypted databases work out of the box**.
 
 It is built around the two things that make SQLite awkward in RPA:
 
-* **Many readers at once** — the library opens databases in WAL mode, so readers never block each other
-  and never block the writer. `SQLite Parallel Query` runs several statements concurrently, each on its
-  own read only connection.
+* **Many readers at once** — databases are opened in WAL mode, so readers never block each other and
+  never block the writer. `SQLite Parallel Query` runs several statements concurrently, each on its own
+  read only connection.
 * **One writer at a time** — SQLite allows exactly one writer. Instead of letting robots collide and fail
   with *"database is locked"*, every write takes a **lock file** next to the database. Writers queue up
   in an orderly way, across processes and across machines when the database sits on a file share.
 
-On top of that: transactions with savepoints, bulk insert and upsert, batch execution, database
-encryption, and exports to **CSV, XLSX and JSON** (the .xlsx writer is built into this package, so Excel
-does not have to be installed and no Open XML library is dragged into your project).
+On top of that: transactions with savepoints, insert of a whole DataTable with upsert, batch execution,
+database encryption, and exports to **CSV, XLSX and JSON** (the .xlsx writer is built into this package,
+so Excel does not have to be installed and no Open XML library is dragged into your project).
+
+Every activity has its own icon and draws the fields you actually fill in on the activity itself, the way
+the UiPath Database activities do.
 
 ---
 
 ## Contents
 
+- [Requirements](#requirements)
 - [Install](#install)
+- [The activities](#the-activities)
 - [Quick start](#quick-start)
 - [Activity reference](#activity-reference)
 - [How concurrency works](#how-concurrency-works)
 - [Encryption](#encryption)
 - [Exporting data](#exporting-data)
+- [Errors, timeouts and cancellation](#errors-timeouts-and-cancellation)
 - [Performance notes](#performance-notes)
 - [Troubleshooting](#troubleshooting)
 - [Building from source](#building-from-source)
+- [License](#license)
+
+---
+
+## Requirements
+
+| | |
+| --- | --- |
+| **Studio** | 2022.10 or newer |
+| **Project types** | Windows, and Windows - Legacy |
+| **Robot** | Nothing to install. No ODBC driver, no System.Data.SQLite, no registry entry, no DSN. |
+| **Package feeds** | The **UiPath Official** feed, enabled by default, for one design time dependency (see below). |
+| **Platform** | Windows x64 and x86. The native engine for both ships in the package. |
+
+The package targets three frameworks, which is what lets one package serve both project types:
+
+| Folder | Used by |
+| --- | --- |
+| `lib/net461` | Windows - Legacy projects |
+| `lib/net6.0-windows7.0` | Windows projects — this is the one Studio normally resolves |
+| `lib/net6.0` | A fallback for a host that resolves without the Windows flavour |
+
+The SQLite stack and the native engine are packed inside those folders and as
+`runtimes/win-x64/native`, so installing the package never asks Studio to resolve them from a feed.
+
+One dependency **is** declared: `System.Activities.ViewModels`. It cannot be bundled, because the
+workflow runtime reads every attribute on an activity through `TypeDescriptor` before running it, so the
+assembly has to resolve on the robot too and not only in Studio. The UiPath Database activities declare
+the same dependency for the same reason, and it restores from the UiPath Official feed.
 
 ---
 
 ## Install
 
-The package targets both UiPath project types:
-
-| UiPath project | Target framework in the package |
-| --- | --- |
-| Windows - Legacy | `net461` |
-| Windows | `net6.0` |
-
-Studio matches a **Windows** project against the plain `net6.0` folder.
-
-Two things decide whether Studio accepts the package at all, and both are easy to get wrong:
-
-* **The `System.Activities` version the assembly binds to.** Studio ships `6.0.0.0`. `UiPath.Workflow.Runtime`
-  on nuget.org is newer and produces a `6.0.3.0` reference, which Studio cannot load — it reports the
-  whole package as *"not compatible with Windows projects"*. The build therefore takes
-  `UiPath.Workflow.Runtime` from UiPath's own feed (see `NuGet.config`), which is the `6.0.0.0` build,
-  and references it with `PrivateAssets="all"` so it never becomes a package dependency.
-* **The lib folders.** `net461` and `net6.0`. Newer UiPath packages ship `net6.0-windows7.0`, but that
-  is for newer Studio versions.
-
-The SQLite stack and the native engine are packed inside `lib/`, so installing the package never asks
-Studio to resolve any of that from a feed. That is what "no ODBC driver and nothing to install" is
-supposed to mean, and it removes a whole class of install failures.
-
-**One** dependency is declared, `System.Activities.ViewModels`, and it is the one that draws the fields
-inside each activity instead of burying them in the Properties panel. It cannot be bundled: the workflow
-runtime reads every attribute on an activity through `TypeDescriptor` before running it, so the assembly
-has to resolve on the robot too, not only in Studio. UiPath's own Database activities declare the same
-dependency for the same reason, and Studio and the robot both restore it from the **UiPath Official**
-feed, which is enabled out of the box. If that feed is turned off in your environment, install
-[**1.2.0**](https://github.com/Mo3bdlaa/Shaker.SQLLiteDB.Activities/releases) instead — same library, no
-designers, no dependencies.
-
-One subtlety worth knowing if you ever repackage this: the `<dependencies>` **groups** must stay in
-the manifest, even when a group is empty. Studio reads the target frameworks from those groups to decide which project types the
-package supports. Bundling the dependencies with `SuppressDependenciesWhenPacking` removes the whole
-element, and Studio then reports the package as *"not compatible with Windows projects"* and shows no
-version at all. Mark the references `PrivateAssets="all"` instead: the dependencies disappear, the groups
-remain.
-
 1. Download `Shaker.SQLLiteDB.Activities.<version>.nupkg` from the
    [Releases page](https://github.com/Mo3bdlaa/Shaker.SQLLiteDB.Activities/releases),
    or build it yourself (see [Building from source](#building-from-source)).
-2. Put it in a feed Studio can see: a local folder feed, or your Orchestrator / MyGet / Azure Artifacts feed.
+2. Put it in a feed Studio can see: a local folder feed, or your Orchestrator / MyGet / Azure Artifacts
+   feed.
 3. In Studio: **Manage Packages → Settings**, add the folder as a source, then install
    **Shaker.SQLLiteDB.Activities**.
 
+If you are replacing a version you already installed, delete
+`%UserProfile%\.nuget\packages\shaker.sqllitedb.activities\<version>` first. NuGet and Studio cache by
+package id *and* version, so reusing a version number otherwise gets you the copy you already had.
+
 ### Finding them in the Activities panel
 
-The eight activities a normal automation actually uses sit at the top level, directly under
-**SQLite**. Everything else is one folder deeper:
+The eight activities a normal automation uses sit at the top level, under **SQLite**. Everything else is
+one folder deeper:
 
 | Where | Activities |
 | --- | --- |
@@ -97,29 +98,96 @@ The eight activities a normal automation actually uses sit at the top level, dir
 
 The quickest way to find any of them is to type **`SQLite`** in the panel's search box.
 
-Each activity has its own icon, colour coded by what it does — blue for connections, green for reads,
-orange for writes, purple for exports, slate for administration — and draws the fields you actually fill
-in on the activity itself: the connection, the SQL, the table, the file, and the result. Everything else
-(open mode, journal mode, locking, timeouts, encoding, conflict policy and so on) stays one click away in
-the **Properties** panel.
+If the panel looks empty after installing: custom activity packages are "classic" activities, and with
+the Modern design experience on, the panel hides them until you switch that on — Activities panel → the
+filter (funnel) icon → **Show Classic**. Then reopen the project; Studio caches the activity list per
+project.
 
-Those come from `Shaker.SQLLiteDB.Activities.Design.dll`, a WPF assembly that ships in the `net461` and
-`net6.0-windows7.0` folders of the package. Studio loads it at design time; a robot never does, and the
-runtime assembly has no reference to WPF at all.
+### What each activity looks like
 
-If the panel stays empty, work through these in order:
+Each one carries its own icon, colour coded by what it does, and draws its main inputs and outputs on the
+activity itself. Everything else — open mode, journal mode, locking, timeouts, encoding, conflict policy
+— stays one click away in the **Properties** panel.
 
-1. **Show classic activities.** Custom activity packages are "classic" activities. With the Modern
-   design experience on, the panel hides them until you switch that on: Activities panel → the filter
-   (funnel) icon → **Show Classic**. This is the most common reason a freshly installed custom package
-   looks like it installed nothing.
-2. **Check the assembly actually loaded.** Open the **Imports** panel and look for
-   `Shaker.SQLLiteDB.Activities.Activities`. If it is listed, the assembly loaded and the problem is
-   only the panel filter above.
-3. **Reopen the project** after installing. Studio caches the activity list per project.
+| Colour | What it does |
+| --- | --- |
+| Blue | Connections and scopes |
+| Green | Reads |
+| Orange | Writes |
+| Purple | Exports |
+| Slate | Administration |
 
-The package carries the whole SQLite stack inside it and declares no NuGet dependencies, so it installs
-and loads from a local folder with no other package source enabled.
+The icons and the canvas layout come from `Shaker.SQLLiteDB.Activities.Design.dll`, a WPF assembly that
+ships in the `net461` and `net6.0-windows7.0` folders. Studio loads it at design time; a robot never
+does, and the runtime assembly references nothing from WPF.
+
+---
+
+## The activities
+
+All 24, and what each one is for. Full property tables are in
+**[docs/activities.md](docs/activities.md)**.
+
+### Connecting
+
+| Activity | What it does |
+| --- | --- |
+| **SQLite Connect** | Opens the database and hands you a `SQLiteConnectionHandle` in its **Connection** output. Pass that to every other activity, then close it with **SQLite Disconnect**. The simplest way to work — no scope to nest things inside. |
+| **SQLite Disconnect** | Closes a connection opened by **SQLite Connect**. Without it the connection lives until the job's process ends. |
+| **SQLite Transaction Scope** | Commits everything inside as one unit of work, rolls back when an activity throws. Nested scopes use a `SAVEPOINT`, so an inner scope can fail without discarding the outer work. Takes the writer lock for the whole transaction by default. |
+| **SQLite Connect Scope** | The same as Connect, except the connection is scoped to a body: activities inside pick it up with nothing to wire, and it is closed however the scope exits. You do not need it — Connect plus Disconnect does the same job — but there is no path that leaves the connection open, and it exposes more tuning (synchronous mode, cache size, retries). |
+
+All three scopes start with a **Sequence** inside them, so you can drop as many activities in as you like.
+
+### Reading
+
+| Activity | Result |
+| --- | --- |
+| **SQLite Execute Query** | A `DataTable` (+ `RowCount`). Column types are derived from the values that actually came back, or forced to text with `ColumnTyping`. `MaxRows` caps the result. |
+| **SQLite Execute Scalar** | One single value instead of a table — `select count(*)`, `select max(id)`. The first value of the first row, plus ready made `TextResult`, `NumberResult` and `IsNull` outputs so you do not have to cast. |
+| **SQLite Parallel Query** | `Dictionary(Of String, DataTable)` — several queries at once, each on its own read only connection. |
+
+### Writing
+
+| Activity | Result |
+| --- | --- |
+| **SQLite Execute Non Query** | **One** INSERT / UPDATE / DELETE / DDL statement. Affected rows (+ `LastInsertRowId`). |
+| **SQLite Insert Data Table** | Writes a whole `DataTable` into a table — one prepared statement, batched transactions. Conflict policy: `Abort`, `Ignore`, `Replace`, `Rollback` or `Upsert` (with `KeyColumns` / `UpdateColumns`). Can create the table from the DataTable's shape. This is the activity for "I have rows, put them in the database". |
+| **SQLite Execute Statements** | Runs a list of *different* statements in one transaction, with the writer lock taken once — an insert, then an update, then a delete. Not the same as Insert Data Table, which repeats one statement over many rows. Optionally collects failures instead of stopping at the first. |
+| **SQLite Execute Script** | A whole SQL *script* — many statements separated by `;`, from a string or a `.sql` file, in one transaction. Use it for a schema file or a migration. |
+
+### Exporting and importing
+
+| Activity | Result |
+| --- | --- |
+| **SQLite Export To CSV** | Streams a query, a table or a DataTable into a CSV file. Delimiter, quoting, encoding, date format and append are configurable. |
+| **SQLite Export To Excel** | A real `.xlsx` workbook: bold frozen header, auto filter, column widths, typed number and date cells. Several queries can go into one workbook, one sheet each. Results beyond the Excel row limit spill into extra sheets. |
+| **SQLite Export To JSON** | A JSON array of objects, to a file or straight into a `String` variable. Numbers, booleans and nulls keep their JSON types. |
+| **SQLite Import CSV** | Reads a CSV file and loads it, with the same conflict handling as Insert Data Table. |
+
+### Schema
+
+| Activity | Result |
+| --- | --- |
+| **SQLite Table Exists** | `Boolean`. |
+| **SQLite Get Table Names** | `List(Of String)`, optionally including views. |
+| **SQLite Get Table Schema** | A `DataTable` with ordinal, column name, declared type, not null, default value and primary key flag. |
+| **SQLite Create Table** | Creates a table from the shape of a DataTable, mapping .NET types onto SQLite storage classes. |
+
+### Maintenance
+
+| Activity | What it does |
+| --- | --- |
+| **SQLite Maintenance** | Housekeeping, one operation per run. `Vacuum` reclaims the space left by deleted rows and shrinks the file. `Analyze` / `Optimize` refresh the statistics the query planner uses. `WalCheckpoint` folds the `-wal` side file back into the database. `IntegrityCheck` and `ForeignKeyCheck` verify the file is not corrupt, and report `IsHealthy`. `Reindex` rebuilds the indexes. |
+| **SQLite Backup Database** | A consistent copy through SQLite's online backup API. You *can* copy the file instead — but only when nothing is writing. Copy a live database and you can get a torn file: a half written page, or the `.db` without its matching `-wal`, which restores as data loss. This copies page by page while other robots keep working, and the copy can be given its own password, or none. |
+| **SQLite Set Password** | Encrypts a database with AES-256, changes its password, or removes the encryption. |
+| **SQLite Attach Database** | Makes a *second* `.db` file visible on the same connection under an alias, so one query can join across both: `select … from main.orders join archive.orders on …`. |
+
+### Locking
+
+| Activity | What it does |
+| --- | --- |
+| **SQLite Write Lock Scope** | Takes the cross process writer lock once and holds it for everything inside, so another robot cannot slip a write in between yours. The lock is released when the scope exits — on success, on error and on cancellation alike. If another robot already holds it, this one waits, up to `LockTimeoutMilliseconds` (60 s by default), then fails with a clear timeout error rather than hanging. Reports how long it waited. |
 
 ---
 
@@ -128,14 +196,16 @@ and loads from a local folder with no other package source enabled.
 ### Read some rows
 
 ```
-SQLite Connect Scope           DatabasePath: "C:\Data\orders.db"
-└── SQLite Execute Query       Sql: "select id, customer, total from orders where total > @min"
-                               Parameters: new Dictionary(Of String, Object) From {{"min", 100}}
-                               Result: dtOrders
+SQLite Connect            DatabasePath: "C:\Data\orders.db"
+                          Connection:   dbConn
+SQLite Execute Query      Connection: dbConn
+                          Sql: "select id, customer, total from orders where total > @min"
+                          Parameters: new Dictionary(Of String, Object) From {{"min", 100}}
+                          Data table: dtOrders
+SQLite Disconnect         Connection: dbConn
 ```
 
-No connection string, no driver, no DSN. The scope opens the file (creating it when missing), turns on
-WAL and closes everything again when the sequence ends, also when an activity throws.
+No connection string, no driver, no DSN. Connect creates the file when it is missing and turns on WAL.
 
 ### Write safely while other robots are running
 
@@ -143,8 +213,8 @@ WAL and closes everything again when the sequence ends, also when an activity th
 SQLite Connect Scope              DatabasePath: "\\fileserver\share\orders.db"
 └── SQLite Write Lock Scope       (takes the lock once for everything inside)
     └── SQLite Transaction Scope  (all or nothing)
-        ├── SQLite Execute Non Query  "insert into orders (customer, total) values (@c, @t)"
-        └── SQLite Insert Data Table  TableName: "order_lines", DataTable: dtLines
+        ├── SQLite Execute Non Query   "insert into orders (customer, total) values (@c, @t)"
+        └── SQLite Insert Data Table   TableName: "order_lines", DataTable: dtLines
 ```
 
 Every other robot that wants to write waits its turn instead of failing. Readers are not affected at all.
@@ -168,66 +238,22 @@ SQLite Import CSV   FilePath: "C:\In\customers.csv"
                     KeyColumns: {"id"}
 ```
 
+### Work with an encrypted database
+
+```
+SQLite Connect    DatabasePath: "C:\Data\orders.db"
+                  Password:     in_DbPassword      ' from an Orchestrator credential asset
+                  Connection:   dbConn
+```
+
+Everything else behaves exactly as it does for a plain database.
+
 ---
 
 ## Activity reference
 
-### Connecting
-
-| Activity | What it does |
-| --- | --- |
-| **SQLite Connect** | Opens the database once and hands you a `SQLiteConnectionHandle` in its **Connection** output. Pass that to every other activity, then close it with **SQLite Disconnect**. This is the simplest way to work — no scope to nest things inside. |
-| **SQLite Transaction Scope** | Commits everything inside as one unit of work, rolls back when an activity throws. Nested scopes use a `SAVEPOINT`, so an inner scope can fail without discarding the outer work. Takes the writer lock for the whole transaction by default. |
-| **SQLite Disconnect** | Closes a connection opened by **SQLite Connect**. |
-
-### Scopes
-
-| Activity | What it does |
-| --- | --- |
-| **SQLite Connect Scope** | The same as **SQLite Connect**, except the connection is scoped to a body: activities inside pick it up automatically, with no Connection argument to wire, and it is closed for you however the scope exits. You do not need it — Connect plus Disconnect does the same job — but it is the safer shape for a long workflow, because there is no path that leaves the connection open. It also exposes more tuning (synchronous mode, cache size, retries). |
-| **SQLite Write Lock Scope** | Takes the cross process writer lock once and holds it for everything inside, so another robot cannot slip a write in between yours. The lock is released when the scope exits — on success, on error and on cancellation alike. If another robot already holds it, this one waits, up to `LockTimeoutMilliseconds` (60 s by default), and then fails with a clear timeout error rather than hanging. Reports how long it waited. |
-
-### Reading
-
-| Activity | Result |
-| --- | --- |
-| **SQLite Execute Query** | `DataTable` (+ `RowCount`). Column types are derived from the values that actually came back, or forced to text with `ColumnTyping`. `MaxRows` caps the result. |
-| **SQLite Execute Scalar** | One single value instead of a table — `select count(*)`, `select max(id)`, `select name from … where id = @id`. Returns the first value of the first row, plus ready made `TextResult`, `NumberResult` and `IsNull` outputs so you do not have to cast. |
-| **SQLite Parallel Query** | `Dictionary(Of String, DataTable)` — several queries at once, each on its own read only connection. |
-
-### Writing
-
-| Activity | Result |
-| --- | --- |
-| **SQLite Execute Non Query** | **One** INSERT / UPDATE / DELETE / DDL statement. Affected rows (+ `LastInsertRowId`). |
-| **SQLite Insert Data Table** | Writes a whole `DataTable` into a table — one prepared statement, batched transactions. Conflict policy: `Abort`, `Ignore`, `Replace`, `Rollback` or `Upsert` (with `KeyColumns` / `UpdateColumns`). Can create the table from the DataTable's shape. This is the activity for "I have rows, put them in the database". |
-| **SQLite Execute Statements** | Runs a list of *different* statements in one transaction, with the writer lock taken once — an insert, then an update, then a delete. Not the same as Insert Data Table, which repeats one statement over many rows. Optionally collects failures instead of stopping at the first. |
-| **SQLite Execute Script** | A whole SQL *script* — many statements separated by `;`, from a string or a `.sql` file, in one transaction. Use it for a schema file or a migration; use Execute Non Query for a single statement. |
-| **SQLite Import CSV** | Reads a CSV file and bulk loads it, with the same conflict handling as the bulk insert. |
-
-### Exporting
-
-| Activity | Result |
-| --- | --- |
-| **SQLite Export To CSV** | Streams a query, a table or a DataTable into a CSV file. Delimiter, quoting, encoding, date format and append are configurable. |
-| **SQLite Export To Excel** | Writes a real `.xlsx` workbook: bold frozen header, auto filter, column widths, typed number and date cells. Several queries can go into one workbook, one sheet each. Results beyond the Excel row limit spill into extra sheets. |
-| **SQLite Export To JSON** | A JSON array of objects, to a file or straight into a `String` variable. Numbers, booleans and nulls keep their JSON types. |
-
-### Schema and housekeeping
-
-| Activity | Result |
-| --- | --- |
-| **SQLite Table Exists** | `Boolean`. |
-| **SQLite Get Table Names** | `List(Of String)`, optionally including views. |
-| **SQLite Get Table Schema** | `DataTable` with ordinal, column name, declared type, not null, default value and primary key flag. |
-| **SQLite Create Table** | Creates a table from the shape of a DataTable. |
-| **SQLite Maintenance** | Database housekeeping, one operation per run. `Vacuum` reclaims the space left by deleted rows and shrinks the file. `Analyze` / `Optimize` refresh the statistics the query planner uses. `WalCheckpoint` folds the `-wal` side file back into the database. `IntegrityCheck` and `ForeignKeyCheck` verify the file is not corrupt, and report `IsHealthy`. `Reindex` rebuilds the indexes. Run Vacuum monthly on a database that sees a lot of deletes; the rest only when you have a reason. |
-| **SQLite Set Password** | Encrypts a database, changes its password, or removes the encryption. |
-| **SQLite Backup Database** | A consistent copy through SQLite's online backup API. You *can* copy the file instead — but only when nothing is writing. Copy a live database and you can get a torn file: a half written page, or the `.db` without its matching `-wal`, which restores as data loss. This waits for a quiet moment and copies page by page while other robots keep working. It also handles encryption: the copy can be given its own password, or none. |
-| **SQLite Attach Database** | Makes a *second* `.db` file visible on the same connection under an alias, so one query can join across both: `select * from main.orders o join archive.orders a on …`. Only useful when your data is split over two files. |
-
-Every activity also has the usual UiPath properties: `TimeoutMS`, `ContinueOnError` (with an
-`ErrorMessage` output), and the connection properties that let it run standalone, without a scope.
+Every activity and every property, generated from the assembly itself:
+**[docs/activities.md](docs/activities.md)**.
 
 ---
 
@@ -371,9 +397,11 @@ Something outside this library is writing to the same file — another tool, or 
 `LockFilePath` points somewhere else. Make sure every writer uses the same lock file path.
 
 **"The embedded SQLite engine (e_sqlcipher) could not be loaded"**
-The native files that come with `SQLitePCLRaw.bundle_e_sqlite3` were not deployed next to the assembly.
-Re-install the package in the project so that NuGet restores its dependencies; in Windows - Legacy
-projects check that the `runtimes\win-x64\native` folder made it into the published package.
+The message lists every path that was searched. The engine ships in the package four times over — beside
+the assemblies, in `x64/` and `x86/` sub folders, and as `runtimes/win-x64/native` — and is loaded by
+full path before anything asks for it, so this should not happen. If it does, one of those paths will
+tell you where the package landed; the usual cause is a partially restored package, which reinstalling
+fixes.
 
 **"The database could not be read with the password that was supplied"**
 Either the password is wrong, or the file is not encrypted at all (supplying a password for a plain
@@ -389,6 +417,25 @@ A SQLite column is dynamically typed, so a column that contains both numbers and
 
 ---
 
+## Errors, timeouts and cancellation
+
+Every activity that talks to the database shares three properties:
+
+| Property | Meaning |
+| --- | --- |
+| `TimeoutMS` | Maximum run time in milliseconds, 120 000 by default. `0` means no limit. When it expires the statement running in the engine is interrupted, not just abandoned. |
+| `ContinueOnError` | When `True` the workflow carries on even if the activity throws. |
+| `ErrorMessage` | The message of the error that was swallowed because `ContinueOnError` was set. Empty when the activity succeeded. |
+
+Stopping a job cancels the statement in flight the same way a timeout does, so a long `VACUUM` or a big
+export does not keep a robot busy after you have asked it to stop.
+
+Errors arrive as `SQLiteActivityException`, or `SQLiteLockTimeoutException` when the writer lock could
+not be taken in time. Both carry a message that names the file, and for a lock timeout, the machine, user
+and process that is holding it.
+
+---
+
 ## Building from source
 
 ```bash
@@ -400,15 +447,19 @@ dotnet pack    src/Shaker.SQLLiteDB.Activities/Shaker.SQLLiteDB.Activities.cspro
 
 Or use the helper scripts: `./build.sh` (Linux/macOS) and `.\build.ps1` (Windows).
 
-To publish a release, push a version tag. The `release` workflow builds, tests, packs and attaches the
-package to a GitHub Release:
+`NuGet.config` adds the UiPath Official feed, which is where the build gets the `6.0.0.0` build of
+`System.Activities` that Studio ships, plus the designer and view model assemblies. The .NET SDK 8 builds
+all three target frameworks on any operating system — `net461` through the reference assemblies package,
+and the WPF designers with `EnableWindowsTargeting` — so CI needs no Windows machine, though the release
+workflow uses one anyway.
+
+To publish a release, run the `release` workflow with a version tag, or push the tag:
 
 ```bash
-git tag v1.0.1 && git push origin v1.0.1
+git tag v1.0.0 && git push origin v1.0.0
 ```
 
-The .NET SDK 8 builds both target frameworks on any operating system; the `net461` output is produced
-with the reference assemblies package, so no Windows machine is required for CI.
+It builds, tests, packs, checks the package layout and attaches the package to a GitHub Release.
 
 ### Layout
 
@@ -417,12 +468,35 @@ src/Shaker.SQLLiteDB.Activities
 ├── Core/          connection settings, connection and transaction handles, writer lock,
 │                  retry policy, command execution, bulk writer, schema helpers
 ├── IO/            CSV reader and writer, XLSX writer, JSON writer
-└── Activities/    the UiPath activities (a NativeActivity shell that reads the enclosing
-                   scope plus an async worker that does the database work off the workflow thread)
+├── Activities/    the UiPath activities (a NativeActivity shell that reads the enclosing
+│                  scope plus an async worker that does the database work off the workflow thread)
+└── Design/        view models, for the Studio Web designer
+
+src/Shaker.SQLLiteDB.Activities.Design
+└── Designers/     one WPF ActivityDesigner per activity: the panel icon and the canvas layout
+
+tools/             the generators that keep the designers, the view models and docs/activities.md
+                   in step with the activities themselves
 tests/             unit and workflow level tests covering the engine, the writer lock, bulk
                    writes, the file formats, and the activities running in the real workflow runtime
+docs/activities.md the generated property reference
 ```
+
+Three things are generated rather than hand written, because each has to list every property of every
+activity and would rot immediately otherwise:
+
+```bash
+# after building, dump the activity metadata with tools/dump-activity-metadata.cs, then:
+python3 tools/generate-designers.py           # src/Shaker.SQLLiteDB.Activities.Design/Designers
+python3 tools/generate-viewmodels.py          # src/Shaker.SQLLiteDB.Activities/Design
+python3 tools/generate-activity-reference.py  # docs/activities.md
+```
+
+---
 
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+SQLCipher Community Edition is © Zetetic LLC, BSD licensed, and is redistributed through the
+`SQLitePCLRaw.bundle_e_sqlcipher` package.

@@ -24,7 +24,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>package-icon.png</PackageIcon>
-    <PackageReleaseNotes>A scope you drag in now starts with a Sequence inside it, so you can drop as many activities into it as you like instead of only one.</PackageReleaseNotes>
+    <PackageReleaseNotes>SQLite for UiPath with no ODBC driver and nothing to install on the robot: the engine, a SQLCipher build with AES-256, ships inside the package. Many readers at once through WAL, one writer at a time through a cross process lock file, transactions, insert of a DataTable with upsert, export to CSV, XLSX and JSON, CSV import, schema inspection, online backup and encryption. 24 activities, each with its own icon and its main fields on the activity itself.</PackageReleaseNotes>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PackageOutputPath>$(ArtifactsDirectory)</PackageOutputPath>

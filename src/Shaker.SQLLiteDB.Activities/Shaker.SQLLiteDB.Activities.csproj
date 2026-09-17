@@ -24,7 +24,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>package-icon.png</PackageIcon>
-    <PackageReleaseNotes>Fixes the three scope activities losing the area you drop activities into, and gives every activity the same width on the canvas instead of one per hint text length.</PackageReleaseNotes>
+    <PackageReleaseNotes>A scope you drag in now starts with a Sequence inside it, so you can drop as many activities into it as you like instead of only one.</PackageReleaseNotes>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PackageOutputPath>$(ArtifactsDirectory)</PackageOutputPath>

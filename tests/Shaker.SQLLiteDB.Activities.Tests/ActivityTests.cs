@@ -1,5 +1,6 @@
 using System;
 using System.Activities;
+using System.Activities.Statements;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -18,6 +19,43 @@ namespace Shaker.SQLLiteDB.Activities.Tests
 {
     public class ActivityTests
     {
+        [Fact]
+        public void AFreshScopeStartsWithASequenceSoSeveralActivitiesFitInIt()
+        {
+            // A scope body holds one activity. Without this, dropping a second activity into a scope in
+            // Studio is impossible, because the first one filled the only slot.
+            foreach (var handler in new[]
+                     {
+                         new SQLiteConnectScope().Body.Handler,
+                         new SQLiteTransactionScope().Body.Handler,
+                         new SQLiteWriteLockScope().Body.Handler,
+                     })
+            {
+                Assert.IsType<Sequence>(handler);
+            }
+        }
+
+        [Fact]
+        public void TheDefaultSequenceOfAScopeRunsWhatIsPutInIt()
+        {
+            using var db = new TestDatabase();
+            var rows = 0;
+
+            var scope = new SQLiteConnectScope { DatabasePath = db.Path };
+            var sequence = (Sequence)scope.Body.Handler;
+            sequence.Activities.Add(new SQLiteExecuteNonQuery { Sql = "create table t (id integer)" });
+            sequence.Activities.Add(new SQLiteExecuteNonQuery { Sql = "insert into t values (1), (2)" });
+            sequence.Activities.Add(new Capture<object>
+            {
+                Value = new InArgument<object>((Activity<object>)new SQLiteExecuteScalar { Sql = "select count(*) from t" }),
+                OnValue = value => rows = Convert.ToInt32(value)
+            });
+
+            WorkflowInvoker.Invoke(scope);
+
+            Assert.Equal(2, rows);
+        }
+
         [Fact]
         public void ActivitiesInsideAScopeShareItsConnection()
         {

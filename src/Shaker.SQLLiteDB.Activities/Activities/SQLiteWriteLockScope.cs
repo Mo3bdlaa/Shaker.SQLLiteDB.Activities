@@ -1,5 +1,6 @@
 using System;
 using System.Activities;
+using System.Activities.Statements;
 using System.ComponentModel;
 using System.Threading;
 using Shaker.SQLLiteDB.Activities.Core;
@@ -27,7 +28,13 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Connection
             DisplayName = "SQLite Write Lock Scope";
             Body = new ActivityAction<SQLiteLockToken>
             {
-                Argument = new DelegateInArgument<SQLiteLockToken>("SQLiteWriteLock")
+                Argument = new DelegateInArgument<SQLiteLockToken>("SQLiteWriteLock"),
+
+                // A scope holds one activity, so an empty one would let you drop a single activity in
+                // and nothing more. Starting with a Sequence is what makes it behave the way every
+                // other scope in Studio does. Opening an existing workflow replaces this with whatever
+                // the file says, so it only ever applies to a scope you have just dragged in.
+                Handler = new Sequence { DisplayName = "Do" }
             };
         }
 

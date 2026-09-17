@@ -10,7 +10,7 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Maintenance
     /// Attaches a second database file to the current connection, so one query can join tables from
     /// both files, for example <c>select * from main.orders join archive.orders_2023 …</c>.
     /// </summary>
-    [Category("SQLite.Advanced")]
+    [Category("SQLite.Maintenance")]
     [DisplayName("SQLite Attach Database")]
     [Description("Attaches another database file to the connection under an alias, so queries can span both files.")]
 #if NET6_0_OR_GREATER
@@ -18,6 +18,16 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Maintenance
 #endif
     public class SQLiteAttachDatabase : SQLiteActivityBase<bool>
     {
+        /// <summary>True when the database was attached, or detached.</summary>
+        [Category("Output")]
+        [DisplayName("Attached")]
+        [Description("True when the database was attached, or detached.")]
+        public new OutArgument<bool> Result
+        {
+            get { return base.Result; }
+            set { base.Result = value; }
+        }
+
         public SQLiteAttachDatabase()
         {
             DisplayName = "SQLite Attach Database";

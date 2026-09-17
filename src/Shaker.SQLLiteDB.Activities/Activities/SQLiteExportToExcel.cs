@@ -20,6 +20,16 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Export
 #endif
     public class SQLiteExportToExcel : SQLiteExportBase<string>
     {
+        /// <summary>Full path of the workbook that was written.</summary>
+        [Category("Output")]
+        [DisplayName("File written")]
+        [Description("Full path of the workbook that was written.")]
+        public new OutArgument<string> Result
+        {
+            get { return base.Result; }
+            set { base.Result = value; }
+        }
+
         public SQLiteExportToExcel()
         {
             DisplayName = "SQLite Export To Excel";

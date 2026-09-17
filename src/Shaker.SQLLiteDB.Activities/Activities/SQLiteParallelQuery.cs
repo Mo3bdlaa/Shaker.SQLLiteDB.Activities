@@ -24,6 +24,16 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Query
 #endif
     public class SQLiteParallelQuery : SQLiteActivityBase<Dictionary<string, DataTable>>
     {
+        /// <summary>One DataTable per query, keyed by the name given to the query.</summary>
+        [Category("Output")]
+        [DisplayName("Results")]
+        [Description("One DataTable per query, keyed by the name given to the query.")]
+        public new OutArgument<System.Collections.Generic.Dictionary<string, System.Data.DataTable>> Result
+        {
+            get { return base.Result; }
+            set { base.Result = value; }
+        }
+
         public SQLiteParallelQuery()
         {
             DisplayName = "SQLite Parallel Query";

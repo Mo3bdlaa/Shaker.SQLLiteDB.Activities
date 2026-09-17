@@ -13,7 +13,7 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Connection
     /// the connection to close itself.
     /// </para>
     /// </summary>
-    [Category("SQLite.Connection")]
+    [Category("SQLite")]
     [DisplayName("SQLite Connect")]
     [Description("Opens a SQLite database and returns the connection. No ODBC driver or SQLite installation is required.")]
 #if NET6_0_OR_GREATER

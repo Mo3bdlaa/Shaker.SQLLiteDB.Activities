@@ -9,7 +9,7 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Write
     /// Runs an INSERT, UPDATE, DELETE or DDL statement and returns the number of affected rows.
     /// The writer lock is taken for the duration of the statement, unless an enclosing scope already holds it.
     /// </summary>
-    [Category("SQLite.Write")]
+    [Category("SQLite")]
     [DisplayName("SQLite Execute Non Query")]
     [Description("Runs an INSERT, UPDATE, DELETE or DDL statement. Writers are serialized through the writer lock.")]
 #if NET6_0_OR_GREATER
@@ -17,6 +17,16 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Write
 #endif
     public class SQLiteExecuteNonQuery : SQLiteStatementActivity<int>
     {
+        /// <summary>How many rows the statement inserted, updated or deleted.</summary>
+        [Category("Output")]
+        [DisplayName("Affected rows")]
+        [Description("How many rows the statement inserted, updated or deleted.")]
+        public new OutArgument<int> Result
+        {
+            get { return base.Result; }
+            set { base.Result = value; }
+        }
+
         public SQLiteExecuteNonQuery()
         {
             DisplayName = "SQLite Execute Non Query";

@@ -8,7 +8,7 @@ using Shaker.SQLLiteDB.Activities.Activities;
 namespace Shaker.SQLLiteDB.Activities.Activities.Query
 {
     /// <summary>Runs a statement and returns the first column of the first row, for example a COUNT(*).</summary>
-    [Category("SQLite.Query")]
+    [Category("SQLite")]
     [DisplayName("SQLite Execute Scalar")]
     [Description("Runs a statement and returns a single value, for example the result of a COUNT or a MAX.")]
 #if NET6_0_OR_GREATER
@@ -16,6 +16,16 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Query
 #endif
     public class SQLiteExecuteScalar : SQLiteStatementActivity<object>
     {
+        /// <summary>The first value of the first row, as an Object. Use TextResult or NumberResult for a ready typed value.</summary>
+        [Category("Output")]
+        [DisplayName("Value")]
+        [Description("The first value of the first row, as an Object. Use TextResult or NumberResult for a ready typed value.")]
+        public new OutArgument<object> Result
+        {
+            get { return base.Result; }
+            set { base.Result = value; }
+        }
+
         public SQLiteExecuteScalar()
         {
             DisplayName = "SQLite Execute Scalar";

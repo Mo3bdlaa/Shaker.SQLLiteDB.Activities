@@ -10,7 +10,7 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Write
     /// Runs a script that contains several statements, taken from a string or from a .sql file.
     /// Useful for schema migrations and seed data.
     /// </summary>
-    [Category("SQLite.Write")]
+    [Category("SQLite.Advanced")]
     [DisplayName("SQLite Execute Script")]
     [Description("Runs a multi statement SQL script from text or from a .sql file, optionally as one transaction.")]
 #if NET6_0_OR_GREATER
@@ -18,6 +18,16 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Write
 #endif
     public class SQLiteExecuteScript : SQLiteActivityBase<int>
     {
+        /// <summary>How many statements the script executed.</summary>
+        [Category("Output")]
+        [DisplayName("Statements run")]
+        [Description("How many statements the script executed.")]
+        public new OutArgument<int> Result
+        {
+            get { return base.Result; }
+            set { base.Result = value; }
+        }
+
         public SQLiteExecuteScript()
         {
             DisplayName = "SQLite Execute Script";

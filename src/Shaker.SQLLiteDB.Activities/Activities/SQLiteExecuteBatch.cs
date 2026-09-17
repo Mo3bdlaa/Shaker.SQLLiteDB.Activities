@@ -13,16 +13,26 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Write
     /// batch. This is the activity to use when a workflow has to apply many different writes at once.
     /// </summary>
     [Category("SQLite.Advanced")]
-    [DisplayName("SQLite Execute Batch")]
+    [DisplayName("SQLite Execute Statements")]
     [Description("Runs several write statements in one transaction while holding the writer lock once.")]
 #if NET6_0_OR_GREATER
     [System.Activities.ViewModels.ViewModelClass(typeof(Shaker.SQLLiteDB.Activities.Design.SQLiteExecuteBatchViewModel))]
 #endif
     public class SQLiteExecuteBatch : SQLiteActivityBase<int>
     {
+        /// <summary>Total number of rows affected by the whole batch.</summary>
+        [Category("Output")]
+        [DisplayName("Affected rows")]
+        [Description("Total number of rows affected by the whole batch.")]
+        public new OutArgument<int> Result
+        {
+            get { return base.Result; }
+            set { base.Result = value; }
+        }
+
         public SQLiteExecuteBatch()
         {
-            DisplayName = "SQLite Execute Batch";
+            DisplayName = "SQLite Execute Statements";
         }
 
         [Category("Input")]

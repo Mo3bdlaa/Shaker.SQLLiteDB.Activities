@@ -16,6 +16,16 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Schema
 #endif
     public class SQLiteTableExists : SQLiteActivityBase<bool>
     {
+        /// <summary>True when the table, or the view, is there.</summary>
+        [Category("Output")]
+        [DisplayName("Exists")]
+        [Description("True when the table, or the view, is there.")]
+        public new OutArgument<bool> Result
+        {
+            get { return base.Result; }
+            set { base.Result = value; }
+        }
+
         public SQLiteTableExists()
         {
             DisplayName = "SQLite Table Exists";
@@ -54,6 +64,16 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Schema
 #endif
     public class SQLiteGetTableNames : SQLiteActivityBase<List<string>>
     {
+        /// <summary>The table names found in the database, as a List(Of String).</summary>
+        [Category("Output")]
+        [DisplayName("Table names")]
+        [Description("The table names found in the database, as a List(Of String).")]
+        public new OutArgument<System.Collections.Generic.List<string>> Result
+        {
+            get { return base.Result; }
+            set { base.Result = value; }
+        }
+
         public SQLiteGetTableNames()
         {
             DisplayName = "SQLite Get Table Names";
@@ -89,7 +109,7 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Schema
     }
 
     /// <summary>Returns the columns of a table with their types and constraints.</summary>
-    [Category("SQLite.Advanced")]
+    [Category("SQLite.Schema")]
     [DisplayName("SQLite Get Table Schema")]
     [Description("Returns the columns of a table as a DataTable: ordinal, name, declared type, not null, default value and primary key flag.")]
 #if NET6_0_OR_GREATER
@@ -97,6 +117,16 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Schema
 #endif
     public class SQLiteGetTableSchema : SQLiteActivityBase<DataTable>
     {
+        /// <summary>One row per column: ordinal, name, declared type, not null, default value and primary key flag.</summary>
+        [Category("Output")]
+        [DisplayName("Schema")]
+        [Description("One row per column: ordinal, name, declared type, not null, default value and primary key flag.")]
+        public new OutArgument<System.Data.DataTable> Result
+        {
+            get { return base.Result; }
+            set { base.Result = value; }
+        }
+
         public SQLiteGetTableSchema()
         {
             DisplayName = "SQLite Get Table Schema";
@@ -127,7 +157,7 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Schema
     }
 
     /// <summary>Creates a table whose columns match a DataTable.</summary>
-    [Category("SQLite.Advanced")]
+    [Category("SQLite.Schema")]
     [DisplayName("SQLite Create Table")]
     [Description("Creates a table from the shape of a DataTable, mapping .NET types onto SQLite storage classes.")]
 #if NET6_0_OR_GREATER
@@ -135,6 +165,16 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Schema
 #endif
     public class SQLiteCreateTable : SQLiteActivityBase<bool>
     {
+        /// <summary>True when the table was created, false when it already existed.</summary>
+        [Category("Output")]
+        [DisplayName("Created")]
+        [Description("True when the table was created, false when it already existed.")]
+        public new OutArgument<bool> Result
+        {
+            get { return base.Result; }
+            set { base.Result = value; }
+        }
+
         public SQLiteCreateTable()
         {
             DisplayName = "SQLite Create Table";

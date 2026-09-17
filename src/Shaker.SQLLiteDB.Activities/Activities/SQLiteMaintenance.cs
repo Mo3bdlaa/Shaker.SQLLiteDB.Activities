@@ -20,6 +20,16 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Maintenance
 #endif
     public class SQLiteMaintenance : SQLiteActivityBase<string>
     {
+        /// <summary>What the operation reported, for example the integrity check result.</summary>
+        [Category("Output")]
+        [DisplayName("Report")]
+        [Description("What the operation reported, for example the integrity check result.")]
+        public new OutArgument<string> Result
+        {
+            get { return base.Result; }
+            set { base.Result = value; }
+        }
+
         public SQLiteMaintenance()
         {
             DisplayName = "SQLite Maintenance";

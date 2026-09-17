@@ -22,6 +22,16 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Maintenance
 #endif
     public class SQLiteSetPassword : SQLiteActivityBase<string>
     {
+        /// <summary>Full path of the database the new password was applied to.</summary>
+        [Category("Output")]
+        [DisplayName("Database path")]
+        [Description("Full path of the database the new password was applied to.")]
+        public new OutArgument<string> Result
+        {
+            get { return base.Result; }
+            set { base.Result = value; }
+        }
+
         public SQLiteSetPassword()
         {
             DisplayName = "SQLite Set Password";

@@ -20,7 +20,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>package-icon.png</PackageIcon>
-    <PackageReleaseNotes>Fixes the native SQLite engine failing to load on a robot: it now ships in the runtimes/win-x64/native layout NuGet actually restores, and is loaded by full path at startup. The activity body now shows only the fields you fill in - everything else moved to the Properties panel. Needs the UiPath Official package feed enabled, for System.Activities.ViewModels. Version 1.2.0 is the same library without the designers.</PackageReleaseNotes>
+    <PackageReleaseNotes>The eight day to day activities now sit directly under SQLite, with Export, Schema, Maintenance and Advanced one level deeper. Every activity result argument has a real name, an Output category and a tooltip instead of sitting unlabelled in Misc. Bulk Insert is now Insert Data Table and Execute Batch is now Execute Statements.</PackageReleaseNotes>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PackageOutputPath>$(ArtifactsDirectory)</PackageOutputPath>

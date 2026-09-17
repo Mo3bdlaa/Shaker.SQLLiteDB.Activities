@@ -10,7 +10,7 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Connection
     /// Runs the activities inside one transaction: everything is committed together, or nothing is.
     /// Nested transaction scopes use a SAVEPOINT, so an inner scope can fail without discarding the outer work.
     /// </summary>
-    [Category("SQLite.Connection")]
+    [Category("SQLite")]
     [DisplayName("SQLite Transaction Scope")]
     [Description("Commits the activities inside as one unit of work and rolls everything back when one of them fails.")]
 #if NET6_0_OR_GREATER

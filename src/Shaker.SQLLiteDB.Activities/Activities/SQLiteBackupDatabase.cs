@@ -20,6 +20,16 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Maintenance
 #endif
     public class SQLiteBackupDatabase : SQLiteActivityBase<string>
     {
+        /// <summary>Full path of the copy that was written.</summary>
+        [Category("Output")]
+        [DisplayName("Backup path")]
+        [Description("Full path of the copy that was written.")]
+        public new OutArgument<string> Result
+        {
+            get { return base.Result; }
+            set { base.Result = value; }
+        }
+
         public SQLiteBackupDatabase()
         {
             DisplayName = "SQLite Backup Database";

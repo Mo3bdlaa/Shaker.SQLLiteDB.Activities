@@ -17,6 +17,16 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Export
 #endif
     public class SQLiteImportCsv : SQLiteActivityBase<int>
     {
+        /// <summary>How many rows the CSV file added to the table.</summary>
+        [Category("Output")]
+        [DisplayName("Rows imported")]
+        [Description("How many rows the CSV file added to the table.")]
+        public new OutArgument<int> Result
+        {
+            get { return base.Result; }
+            set { base.Result = value; }
+        }
+
         public SQLiteImportCsv()
         {
             DisplayName = "SQLite Import CSV";

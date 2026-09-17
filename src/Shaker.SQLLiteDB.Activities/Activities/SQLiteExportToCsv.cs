@@ -18,6 +18,16 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Export
 #endif
     public class SQLiteExportToCsv : SQLiteExportBase<string>
     {
+        /// <summary>Full path of the CSV file that was written.</summary>
+        [Category("Output")]
+        [DisplayName("File written")]
+        [Description("Full path of the CSV file that was written.")]
+        public new OutArgument<string> Result
+        {
+            get { return base.Result; }
+            set { base.Result = value; }
+        }
+
         public SQLiteExportToCsv()
         {
             DisplayName = "SQLite Export To CSV";

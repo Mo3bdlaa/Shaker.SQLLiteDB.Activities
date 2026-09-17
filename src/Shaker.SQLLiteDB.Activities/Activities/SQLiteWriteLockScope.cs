@@ -12,7 +12,7 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Connection
     /// together, so that no other process can slip a write in between, and so that the lock is taken
     /// once instead of once per activity.
     /// </summary>
-    [Category("SQLite.Advanced")]
+    [Category("SQLite")]
     [DisplayName("SQLite Write Lock Scope")]
     [Description("Takes the cross process writer lock once and keeps it for all the activities inside.")]
 #if NET6_0_OR_GREATER

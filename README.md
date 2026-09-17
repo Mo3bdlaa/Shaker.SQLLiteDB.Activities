@@ -84,21 +84,16 @@ remain.
 
 ### Finding them in the Activities panel
 
-The 24 activities are grouped by the job they do, so the common ones are the ones you see first:
+The eight activities a normal automation actually uses sit at the top level, directly under
+**SQLite**. Everything else is one folder deeper:
 
-| Group | Activities |
+| Where | Activities |
 | --- | --- |
-| **SQLite > Connection** | Connect, Disconnect, Transaction Scope |
-| **SQLite > Query** | Execute Query, Execute Scalar |
-| **SQLite > Write** | Execute Non Query, Bulk Insert, Execute Script |
-| **SQLite > Export** | Export To CSV, Export To Excel, Import CSV |
-| **SQLite > Schema** | Table Exists, Get Table Names |
-| **SQLite > Maintenance** | Backup Database, Set Password, Maintenance |
-| **SQLite > Advanced** | Connect Scope, Write Lock Scope, Parallel Query, Execute Batch, Attach Database, Create Table, Get Table Schema, Export To JSON |
-
-Everything you need for a normal automation is in the first six groups. **Advanced** holds the ones you
-only reach for in specific situations — cross-process lock choreography, running many queries at once,
-joining two database files, or building a table from a DataTable's shape.
+| **SQLite** | Connect, Disconnect, Execute Query, Execute Scalar, Execute Non Query, Insert Data Table, Transaction Scope, Write Lock Scope |
+| **SQLite > Export** | Export To CSV, Export To Excel, Export To JSON, Import CSV |
+| **SQLite > Schema** | Table Exists, Get Table Names, Get Table Schema, Create Table |
+| **SQLite > Maintenance** | Backup Database, Set Password, Maintenance, Attach Database |
+| **SQLite > Advanced** | Connect Scope, Execute Script, Execute Statements, Parallel Query |
 
 The quickest way to find any of them is to type **`SQLite`** in the panel's search box.
 
@@ -144,7 +139,7 @@ SQLite Connect Scope              DatabasePath: "\\fileserver\share\orders.db"
 └── SQLite Write Lock Scope       (takes the lock once for everything inside)
     └── SQLite Transaction Scope  (all or nothing)
         ├── SQLite Execute Non Query  "insert into orders (customer, total) values (@c, @t)"
-        └── SQLite Bulk Insert        TableName: "order_lines", DataTable: dtLines
+        └── SQLite Insert Data Table  TableName: "order_lines", DataTable: dtLines
 ```
 
 Every other robot that wants to write waits its turn instead of failing. Readers are not affected at all.
@@ -180,29 +175,29 @@ SQLite Import CSV   FilePath: "C:\In\customers.csv"
 | **SQLite Transaction Scope** | Commits everything inside as one unit of work, rolls back when an activity throws. Nested scopes use a `SAVEPOINT`, so an inner scope can fail without discarding the outer work. Takes the writer lock for the whole transaction by default. |
 | **SQLite Disconnect** | Closes a connection opened by **SQLite Connect**. |
 
-### Advanced scopes
+### Scopes
 
 | Activity | What it does |
 | --- | --- |
-| **SQLite Connect Scope** | Opens the database and shares the connection with every SQLite activity inside it. Applies the PRAGMA tuning (WAL, busy timeout, synchronous, foreign keys) and closes the connection on success, on error and on cancellation. Also outputs the connection, if you prefer to pass it around by hand. |
-| **SQLite Write Lock Scope** | Takes the cross process writer lock once and holds it for everything inside, so a group of writes cannot be interleaved with another robot's writes. Reports how long it waited. |
+| **SQLite Connect Scope** | The same as **SQLite Connect**, except the connection is scoped to a body: activities inside pick it up automatically, with no Connection argument to wire, and it is closed for you however the scope exits. You do not need it — Connect plus Disconnect does the same job — but it is the safer shape for a long workflow, because there is no path that leaves the connection open. It also exposes more tuning (synchronous mode, cache size, retries). |
+| **SQLite Write Lock Scope** | Takes the cross process writer lock once and holds it for everything inside, so another robot cannot slip a write in between yours. The lock is released when the scope exits — on success, on error and on cancellation alike. If another robot already holds it, this one waits, up to `LockTimeoutMilliseconds` (60 s by default), and then fails with a clear timeout error rather than hanging. Reports how long it waited. |
 
 ### Reading
 
 | Activity | Result |
 | --- | --- |
 | **SQLite Execute Query** | `DataTable` (+ `RowCount`). Column types are derived from the values that actually came back, or forced to text with `ColumnTyping`. `MaxRows` caps the result. |
-| **SQLite Execute Scalar** | The first value of the first row, plus ready made `TextResult`, `NumberResult` and `IsNull` outputs. |
+| **SQLite Execute Scalar** | One single value instead of a table — `select count(*)`, `select max(id)`, `select name from … where id = @id`. Returns the first value of the first row, plus ready made `TextResult`, `NumberResult` and `IsNull` outputs so you do not have to cast. |
 | **SQLite Parallel Query** | `Dictionary(Of String, DataTable)` — several queries at once, each on its own read only connection. |
 
 ### Writing
 
 | Activity | Result |
 | --- | --- |
-| **SQLite Execute Non Query** | Affected rows (+ `LastInsertRowId`). |
-| **SQLite Bulk Insert** | Rows written, using one prepared statement and batched transactions. Conflict policy: `Abort`, `Ignore`, `Replace`, `Rollback` or `Upsert` (with `KeyColumns` / `UpdateColumns`). Can create the table from the DataTable. |
-| **SQLite Execute Batch** | Runs a `List(Of SQLiteStatement)` in one transaction, with the lock taken once. Optionally collects failures instead of stopping. |
-| **SQLite Execute Script** | Runs a multi statement script from a string or a `.sql` file, in one transaction. |
+| **SQLite Execute Non Query** | **One** INSERT / UPDATE / DELETE / DDL statement. Affected rows (+ `LastInsertRowId`). |
+| **SQLite Insert Data Table** | Writes a whole `DataTable` into a table — one prepared statement, batched transactions. Conflict policy: `Abort`, `Ignore`, `Replace`, `Rollback` or `Upsert` (with `KeyColumns` / `UpdateColumns`). Can create the table from the DataTable's shape. This is the activity for "I have rows, put them in the database". |
+| **SQLite Execute Statements** | Runs a list of *different* statements in one transaction, with the writer lock taken once — an insert, then an update, then a delete. Not the same as Insert Data Table, which repeats one statement over many rows. Optionally collects failures instead of stopping at the first. |
+| **SQLite Execute Script** | A whole SQL *script* — many statements separated by `;`, from a string or a `.sql` file, in one transaction. Use it for a schema file or a migration; use Execute Non Query for a single statement. |
 | **SQLite Import CSV** | Reads a CSV file and bulk loads it, with the same conflict handling as the bulk insert. |
 
 ### Exporting
@@ -221,10 +216,10 @@ SQLite Import CSV   FilePath: "C:\In\customers.csv"
 | **SQLite Get Table Names** | `List(Of String)`, optionally including views. |
 | **SQLite Get Table Schema** | `DataTable` with ordinal, column name, declared type, not null, default value and primary key flag. |
 | **SQLite Create Table** | Creates a table from the shape of a DataTable. |
-| **SQLite Maintenance** | `VACUUM`, `ANALYZE`, `PRAGMA optimize`, WAL checkpoint, integrity check, foreign key check, `REINDEX`. Reports `IsHealthy` for the checks. |
+| **SQLite Maintenance** | Database housekeeping, one operation per run. `Vacuum` reclaims the space left by deleted rows and shrinks the file. `Analyze` / `Optimize` refresh the statistics the query planner uses. `WalCheckpoint` folds the `-wal` side file back into the database. `IntegrityCheck` and `ForeignKeyCheck` verify the file is not corrupt, and report `IsHealthy`. `Reindex` rebuilds the indexes. Run Vacuum monthly on a database that sees a lot of deletes; the rest only when you have a reason. |
 | **SQLite Set Password** | Encrypts a database, changes its password, or removes the encryption. |
-| **SQLite Backup Database** | A consistent copy through the SQLite online backup API — safe while the database is in use, unlike copying the file. Encrypted databases are copied with SQLCipher's export, and the copy can get its own password. |
-| **SQLite Attach Database** | Attaches a second database file under an alias so one query can join both. |
+| **SQLite Backup Database** | A consistent copy through SQLite's online backup API. You *can* copy the file instead — but only when nothing is writing. Copy a live database and you can get a torn file: a half written page, or the `.db` without its matching `-wal`, which restores as data loss. This waits for a quiet moment and copies page by page while other robots keep working. It also handles encryption: the copy can be given its own password, or none. |
+| **SQLite Attach Database** | Makes a *second* `.db` file visible on the same connection under an alias, so one query can join across both: `select * from main.orders o join archive.orders a on …`. Only useful when your data is split over two files. |
 
 Every activity also has the usual UiPath properties: `TimeoutMS`, `ContinueOnError` (with an
 `ErrorMessage` output), and the connection properties that let it run standalone, without a scope.
@@ -345,7 +340,7 @@ through the `SQLitePCLRaw.bundle_e_sqlcipher` package.
 
 ## Performance notes
 
-* Prefer **SQLite Bulk Insert** over a loop of Execute Non Query: one prepared statement and one
+* Prefer **SQLite Insert Data Table** over a loop of Execute Non Query: one prepared statement and one
   transaction per batch instead of one transaction per row — typically two orders of magnitude faster.
 * Keep `BatchSize` around 1000 for large loads. `0` puts everything in one transaction, which is fastest
   but holds the writer lock for the whole load.

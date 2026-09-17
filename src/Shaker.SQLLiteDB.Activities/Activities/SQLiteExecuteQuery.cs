@@ -10,7 +10,7 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Query
     /// Runs a SELECT and returns the result as a DataTable. Reads never take the writer lock, so any
     /// number of robots can read the same database at the same time while another one writes.
     /// </summary>
-    [Category("SQLite.Query")]
+    [Category("SQLite")]
     [DisplayName("SQLite Execute Query")]
     [Description("Runs a SELECT statement and returns a DataTable. Safe to run in parallel with other readers and with a writer.")]
 #if NET6_0_OR_GREATER
@@ -18,6 +18,16 @@ namespace Shaker.SQLLiteDB.Activities.Activities.Query
 #endif
     public class SQLiteExecuteQuery : SQLiteStatementActivity<DataTable>
     {
+        /// <summary>The rows the query returned, as a DataTable.</summary>
+        [Category("Output")]
+        [DisplayName("Data table")]
+        [Description("The rows the query returned, as a DataTable.")]
+        public new OutArgument<System.Data.DataTable> Result
+        {
+            get { return base.Result; }
+            set { base.Result = value; }
+        }
+
         public SQLiteExecuteQuery()
         {
             DisplayName = "SQLite Execute Query";

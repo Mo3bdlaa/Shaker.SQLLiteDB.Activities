@@ -1,0 +1,53 @@
+<sap:ActivityDesigner x:Class="Shaker.SQLLiteDB.Activities.Design.Designers.SQLiteExecuteScalarDesigner"
+                      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      xmlns:sap="clr-namespace:System.Activities.Presentation;assembly=System.Activities.Presentation"
+                      xmlns:sapv="clr-namespace:System.Activities.Presentation.View;assembly=System.Activities.Presentation"
+                      xmlns:sapc="clr-namespace:System.Activities.Presentation.Converters;assembly=System.Activities.Presentation">
+    <sap:ActivityDesigner.Icon>
+      <DrawingBrush Stretch="Uniform">
+        <DrawingBrush.Drawing>
+          <DrawingGroup>
+              <GeometryDrawing Brush="#16A34A" Geometry="M 3,0 L 13,0 A 3,3 0 0 1 16,3 L 16,13 A 3,3 0 0 1 13,16 L 3,16 A 3,3 0 0 1 0,13 L 0,3 A 3,3 0 0 1 3,0 Z" />
+              <GeometryDrawing><GeometryDrawing.Pen><Pen Brush="#FFFFFF" Thickness="1.6" /></GeometryDrawing.Pen><GeometryDrawing.Geometry><EllipseGeometry Center="8,6.4" RadiusX="3.2" RadiusY="3.2" /></GeometryDrawing.Geometry></GeometryDrawing>
+              <GeometryDrawing Geometry="M 4.4,12.4 L 11.6,12.4"><GeometryDrawing.Pen><Pen Brush="#FFFFFF" Thickness="1.8" StartLineCap="Round" EndLineCap="Round" LineJoin="Round" /></GeometryDrawing.Pen></GeometryDrawing>
+          </DrawingGroup>
+        </DrawingBrush.Drawing>
+      </DrawingBrush>
+    </sap:ActivityDesigner.Icon>
+  <sap:ActivityDesigner.Resources>
+    <sapc:ArgumentToExpressionConverter x:Key="ArgumentToExpressionConverter" />
+  </sap:ActivityDesigner.Resources>
+  <Grid Margin="4">
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="Auto" />
+      <ColumnDefinition Width="*" MinWidth="190" />
+    </Grid.ColumnDefinitions>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+    <TextBlock Grid.Row="0" Grid.Column="0" Text="Connection" Margin="0,5,8,5" VerticalAlignment="Center" />
+    <sapv:ExpressionTextBox x:Name="ConnectionBox" Grid.Row="0" Grid.Column="1" Margin="0,2"
+                            HintText="Connection"
+                            OwnerActivity="{Binding Path=ModelItem}"
+                            Expression="{Binding Path=ModelItem.Connection, Mode=TwoWay, Converter={StaticResource ArgumentToExpressionConverter}, ConverterParameter=In}" />
+    <TextBlock Grid.Row="1" Grid.Column="0" Text="Database path" Margin="0,5,8,5" VerticalAlignment="Center" />
+    <sapv:ExpressionTextBox x:Name="DatabasePathBox" Grid.Row="1" Grid.Column="1" Margin="0,2"
+                            HintText="Full path of the SQLite database file, for example C:\Data\orders"
+                            OwnerActivity="{Binding Path=ModelItem}"
+                            Expression="{Binding Path=ModelItem.DatabasePath, Mode=TwoWay, Converter={StaticResource ArgumentToExpressionConverter}, ConverterParameter=In}" />
+    <TextBlock Grid.Row="2" Grid.Column="0" Text="SQL" Margin="0,5,8,5" VerticalAlignment="Center" />
+    <sapv:ExpressionTextBox x:Name="SqlBox" Grid.Row="2" Grid.Column="1" Margin="0,2"
+                            HintText="The SQL statement"
+                            OwnerActivity="{Binding Path=ModelItem}"
+                            Expression="{Binding Path=ModelItem.Sql, Mode=TwoWay, Converter={StaticResource ArgumentToExpressionConverter}, ConverterParameter=In}" />
+    <TextBlock Grid.Row="3" Grid.Column="0" Text="Result" Margin="0,5,8,5" VerticalAlignment="Center" />
+    <sapv:ExpressionTextBox x:Name="ResultBox" Grid.Row="3" Grid.Column="1" Margin="0,2"
+                            HintText="Result" UseLocationExpression="True"
+                            OwnerActivity="{Binding Path=ModelItem}"
+                            Expression="{Binding Path=ModelItem.Result, Mode=TwoWay, Converter={StaticResource ArgumentToExpressionConverter}, ConverterParameter=Out}" />
+  </Grid>
+</sap:ActivityDesigner>

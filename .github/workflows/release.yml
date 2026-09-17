@@ -63,10 +63,20 @@ jobs:
           # flavoured net6.0-windows7.0 instead makes it call the package incompatible.
           cd artifacts
           unzip -l *.nupkg | grep -E 'lib/' || true
-          unzip -l *.nupkg | grep -q 'lib/net461/' || { echo 'missing lib/net461'; exit 1; }
-          unzip -l *.nupkg | grep -q 'lib/net6.0/' || { echo 'missing lib/net6.0'; exit 1; }
+          # All three lib folders, which is what UiPath.Database.Activities 1.9.0 ships and what
+          # Studio 2022.10 installs. An earlier build offered net6.0-windows7.0 *instead of* net6.0
+          # and Studio called the package incompatible; offering both is what works.
+          for tfm in net461 net6.0 net6.0-windows7.0; do
+            unzip -l *.nupkg | grep -q "lib/$tfm/Shaker.SQLLiteDB.Activities.dll" || { echo "missing lib/$tfm"; exit 1; }
+          done
           unzip -l *.nupkg | grep -q 'System.Activities.ViewModels.dll' && { echo 'the view models assembly is restored, never bundled'; exit 1; }
-          unzip -l *.nupkg | grep -q 'net6.0-windows' && { echo 'net6.0-windows makes Studio reject the package'; exit 1; }
+
+          # The WPF designers ship only where WPF can load: the plain net6.0 fallback must not carry them.
+          for tfm in net461 net6.0-windows7.0; do
+            unzip -l *.nupkg | grep -q "lib/$tfm/Shaker.SQLLiteDB.Activities.Design.dll" || { echo "lib/$tfm is missing the designers"; exit 1; }
+          done
+          unzip -l *.nupkg | grep -q 'lib/net6.0/Shaker.SQLLiteDB.Activities.Design.dll' \
+            && { echo 'the designers must not ship in lib/net6.0, which cannot load WPF'; exit 1; }
           unzip -p *.nupkg '*.nuspec' | grep -q 'UiPath.Workflow' && { echo 'System.Activities must not be a package dependency'; exit 1; }
           # Exactly one declared dependency is allowed: System.Activities.ViewModels, which carries the
           # designer layout and has to resolve on the robot as well, so it cannot be bundled. The
@@ -77,8 +87,8 @@ jobs:
             *'id="System.Activities.ViewModels"'*) ;;
             *) echo 'the designer view models dependency is missing'; exit 1 ;;
           esac
-          if [ "$(printf '%s\n' "$DEPS" | grep -c '<dependency ')" != 1 ]; then
-            echo 'only System.Activities.ViewModels may be declared, in the net6.0 group; the SQLite stack is bundled in lib/'
+          if [ "$(printf '%s\n' "$DEPS" | grep -c '<dependency ')" != 2 ]; then
+            echo 'only System.Activities.ViewModels may be declared, once per net6.0 group; the SQLite stack is bundled in lib/'
             exit 1
           fi
 
@@ -87,7 +97,7 @@ jobs:
           # no <dependencies> element at all it reports the package as not compatible with anything.
           unzip -p *.nupkg '*.nuspec' | grep -q 'targetFramework=".NETFramework4.6.1"' || { echo 'missing the net461 dependency group'; exit 1; }
           unzip -p *.nupkg '*.nuspec' | grep -q 'targetFramework="net6.0"' || { echo 'missing the net6.0 dependency group'; exit 1; }
-          for tfm in net461 net6.0; do
+          for tfm in net461 net6.0 net6.0-windows7.0; do
             unzip -l *.nupkg | grep -q "lib/$tfm/Microsoft.Data.Sqlite.dll" || { echo "lib/$tfm is missing the bundled SQLite stack"; exit 1; }
             unzip -l *.nupkg | grep -q "lib/$tfm/e_sqlcipher.dll" || { echo "lib/$tfm is missing the native engine"; exit 1; }
           done

@@ -97,10 +97,15 @@ The eight activities a normal automation actually uses sit at the top level, dir
 
 The quickest way to find any of them is to type **`SQLite`** in the panel's search box.
 
-Each activity shows the things you actually fill in — the connection, the SQL, the table, the file, the
-result — inside the activity itself, the way the UiPath Database activities do. Everything else (open
-mode, journal mode, locking, timeouts, encoding, conflict policy and so on) stays one click away in the
-**Properties** panel.
+Each activity has its own icon, colour coded by what it does — blue for connections, green for reads,
+orange for writes, purple for exports, slate for administration — and draws the fields you actually fill
+in on the activity itself: the connection, the SQL, the table, the file, and the result. Everything else
+(open mode, journal mode, locking, timeouts, encoding, conflict policy and so on) stays one click away in
+the **Properties** panel.
+
+Those come from `Shaker.SQLLiteDB.Activities.Design.dll`, a WPF assembly that ships in the `net461` and
+`net6.0-windows7.0` folders of the package. Studio loads it at design time; a robot never does, and the
+runtime assembly has no reference to WPF at all.
 
 If the panel stays empty, work through these in order:
 

@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- The WPF activity designers: the icon in the panel and the fields drawn on the activity in the
+         canvas. Studio loads this assembly at design time only; a robot never sees it, which is why it
+         is kept out of lib/net6.0 (a plain net6.0 host cannot load WPF at all). -->
+    <TargetFrameworks>net461;net6.0-windows</TargetFrameworks>
+    <UseWPF>true</UseWPF>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <RootNamespace>Shaker.SQLLiteDB.Activities.Design</RootNamespace>
+    <AssemblyName>Shaker.SQLLiteDB.Activities.Design</AssemblyName>
+    <AssemblyTitle>Shaker SQLite Activities designers</AssemblyTitle>
+    <IsPackable>false</IsPackable>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Shaker.SQLLiteDB.Activities\Shaker.SQLLiteDB.Activities.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+    <Reference Include="System.Activities" />
+    <Reference Include="System.Activities.Presentation" />
+    <Reference Include="System.Activities.Core.Presentation" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' != 'net461'">
+    <!-- Studio's own port of the WF designer stack. Compile time only: Studio brings its copy. -->
+    <PackageReference Include="System.Activities.Core.Presentation" Version="6.0.0-20220318.2" PrivateAssets="all" ExcludeAssets="runtime" />
+    <PackageReference Include="UiPath.Workflow.Runtime" Version="6.0.0-20220401-03" PrivateAssets="all" ExcludeAssets="runtime" />
+  </ItemGroup>
+
+</Project>

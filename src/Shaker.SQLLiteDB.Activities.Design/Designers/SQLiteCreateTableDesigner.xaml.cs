@@ -1,0 +1,18 @@
+using System;
+
+namespace Shaker.SQLLiteDB.Activities.Design.Designers
+{
+    /// <summary>Canvas layout and panel icon for <see cref="Shaker.SQLLiteDB.Activities.Activities.Schema.SQLiteCreateTable"/>. Generated - see tools/generate-designers.py.</summary>
+    public partial class SQLiteCreateTableDesigner
+    {
+        public SQLiteCreateTableDesigner()
+        {
+            InitializeComponent();
+            ConnectionBox.ExpressionType = typeof(Shaker.SQLLiteDB.Activities.Core.SQLiteConnectionHandle);
+            DatabasePathBox.ExpressionType = typeof(string);
+            TableNameBox.ExpressionType = typeof(string);
+            DataTableBox.ExpressionType = typeof(System.Data.DataTable);
+            ResultBox.ExpressionType = typeof(bool);
+        }
+    }
+}

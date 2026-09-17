@@ -1,12 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!-- net461 => UiPath "Windows - Legacy" projects
-         net6.0 => UiPath "Windows" projects
-         Studio matches a Windows project against the plain net6.0 folder. The windows flavoured
-         net6.0-windows7.0 is what newer UiPath packages ship, but Studio 2022.10 rejects a package
-         that offers it, so this library stays on the pair that Studio accepts. -->
-    <TargetFrameworks>net461;net6.0</TargetFrameworks>
+    <!-- net461              => UiPath "Windows - Legacy" projects
+         net6.0-windows7.0   => UiPath "Windows" projects, and where the designers live
+         net6.0              => the plain fallback, for a host that resolves without the Windows flavour
+         All three, which is the layout UiPath.Database.Activities 1.9.0 ships and Studio 2022.10
+         installs happily. An earlier build offered net6.0-windows7.0 *instead of* net6.0 and Studio
+         rejected it; offering both is what works. -->
+    <TargetFrameworks>net461;net6.0;net6.0-windows</TargetFrameworks>
+    <!-- net6.0-windows carries the WPF activity designers, and is what a Studio "Windows" project
+         actually resolves against. Building it from Linux needs this switch. -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <RootNamespace>Shaker.SQLLiteDB.Activities</RootNamespace>
     <AssemblyName>Shaker.SQLLiteDB.Activities</AssemblyName>
     <AssemblyTitle>Shaker SQLite Activities</AssemblyTitle>
@@ -20,7 +24,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>package-icon.png</PackageIcon>
-    <PackageReleaseNotes>SQLite for UiPath with no ODBC driver and nothing to install on the robot: the engine, a SQLCipher build with AES-256, ships inside the package. Many readers at once through WAL, one writer at a time through a cross process lock file, transactions, insert of a DataTable with upsert, export to CSV, XLSX and JSON, CSV import, schema inspection, online backup and encryption.</PackageReleaseNotes>
+    <PackageReleaseNotes>Adds WPF activity designers: every activity now has its own icon in the panel and draws its main inputs and outputs on the activity itself instead of hiding them in the Properties panel. Version 1.0.0 is the same library without the designers.</PackageReleaseNotes>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PackageOutputPath>$(ArtifactsDirectory)</PackageOutputPath>
@@ -71,7 +75,7 @@
     <Reference Include="System.IO.Compression.FileSystem" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+  <ItemGroup Condition="'$(TargetFramework)' != 'net461'">
     <!-- System.Activities for modern .NET. Compile time only: the workflow host - Studio and the
          robot - brings its own copy at run time.
          The version matters. Studio ships System.Activities 6.0.0.0, and an assembly compiled against
@@ -122,9 +126,24 @@
          The lib/ copies remain for the .NET Framework loader and for hosts that just extract the
          package; SQLiteNative.PreloadWindowsEngine walks all of these by full path at startup. -->
     <None Include="$(ESqlCipherNative)/win-x64/native/e_sqlcipher.dll"
-          Pack="true" PackagePath="runtimes/win-x64/native/;lib/net461/;lib/net461/x64/;lib/net6.0/;lib/net6.0/x64/" Visible="false" />
+          Pack="true" PackagePath="runtimes/win-x64/native/;lib/net461/;lib/net461/x64/;lib/net6.0/;lib/net6.0/x64/;lib/net6.0-windows7.0/;lib/net6.0-windows7.0/x64/" Visible="false" />
     <None Include="$(ESqlCipherNative)/win-x86/native/e_sqlcipher.dll"
-          Pack="true" PackagePath="runtimes/win-x86/native/;lib/net461/x86/;lib/net6.0/x86/" Visible="false" />
+          Pack="true" PackagePath="runtimes/win-x86/native/;lib/net461/x86/;lib/net6.0/x86/;lib/net6.0-windows7.0/x86/" Visible="false" />
+  </ItemGroup>
+
+  <!-- The WPF designers. They are built here rather than referenced, because the designer project
+       references this one: a ProjectReference back would be a cycle. They go into the two Windows
+       lib folders only - lib/net6.0 is the frameworkless fallback and cannot load WPF. -->
+  <Target Name="BuildDesigners" BeforeTargets="GenerateNuspec" Condition="'$(NoBuild)' != 'true'">
+    <MSBuild Projects="$(MSBuildThisFileDirectory)..\Shaker.SQLLiteDB.Activities.Design\Shaker.SQLLiteDB.Activities.Design.csproj"
+             Targets="Build" Properties="Configuration=$(Configuration)" />
+  </Target>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)..\Shaker.SQLLiteDB.Activities.Design\bin\$(Configuration)\net461\Shaker.SQLLiteDB.Activities.Design.dll"
+          Pack="true" PackagePath="lib/net461/" Visible="false" />
+    <None Include="$(MSBuildThisFileDirectory)..\Shaker.SQLLiteDB.Activities.Design\bin\$(Configuration)\net6.0-windows\Shaker.SQLLiteDB.Activities.Design.dll"
+          Pack="true" PackagePath="lib/net6.0-windows7.0/" Visible="false" />
   </ItemGroup>
 
 </Project>

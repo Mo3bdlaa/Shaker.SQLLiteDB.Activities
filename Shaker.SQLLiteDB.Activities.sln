@@ -11,6 +11,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{9197CFD3
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shaker.SQLLiteDB.Activities.Tests", "tests\Shaker.SQLLiteDB.Activities.Tests\Shaker.SQLLiteDB.Activities.Tests.csproj", "{79C3A346-C975-4F73-8B4F-3323639E22AE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shaker.SQLLiteDB.Activities.Design", "src\Shaker.SQLLiteDB.Activities.Design\Shaker.SQLLiteDB.Activities.Design.csproj", "{EA5FB9BD-E65F-432F-91A5-719562A5B24B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,9 +30,14 @@ Global
 		{79C3A346-C975-4F73-8B4F-3323639E22AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{79C3A346-C975-4F73-8B4F-3323639E22AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{79C3A346-C975-4F73-8B4F-3323639E22AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA5FB9BD-E65F-432F-91A5-719562A5B24B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA5FB9BD-E65F-432F-91A5-719562A5B24B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA5FB9BD-E65F-432F-91A5-719562A5B24B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA5FB9BD-E65F-432F-91A5-719562A5B24B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{9E48E442-964E-4268-8D58-76893B1F62E6} = {EB819396-C604-40B2-9CCA-E90D8DAC4E1F}
 		{79C3A346-C975-4F73-8B4F-3323639E22AE} = {9197CFD3-FC2D-4893-BAAC-E19809C444A6}
+		{EA5FB9BD-E65F-432F-91A5-719562A5B24B} = {EB819396-C604-40B2-9CCA-E90D8DAC4E1F}
 	EndGlobalSection
 EndGlobal

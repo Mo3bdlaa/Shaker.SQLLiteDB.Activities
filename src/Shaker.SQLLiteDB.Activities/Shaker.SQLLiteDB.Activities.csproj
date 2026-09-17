@@ -20,7 +20,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>package-icon.png</PackageIcon>
-    <PackageReleaseNotes>The eight day to day activities now sit directly under SQLite, with Export, Schema, Maintenance and Advanced one level deeper. Every activity result argument has a real name, an Output category and a tooltip instead of sitting unlabelled in Misc. Bulk Insert is now Insert Data Table and Execute Batch is now Execute Statements.</PackageReleaseNotes>
+    <PackageReleaseNotes>SQLite for UiPath with no ODBC driver and nothing to install on the robot: the engine, a SQLCipher build with AES-256, ships inside the package. Many readers at once through WAL, one writer at a time through a cross process lock file, transactions, insert of a DataTable with upsert, export to CSV, XLSX and JSON, CSV import, schema inspection, online backup and encryption.</PackageReleaseNotes>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <PackageOutputPath>$(ArtifactsDirectory)</PackageOutputPath>
